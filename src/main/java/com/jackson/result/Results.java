@@ -4,6 +4,7 @@ import com.jackson.exception.CustomizeErrorCode;
 import com.jackson.exception.CustomizeException;
 import lombok.Data;
 
+import javax.swing.undo.CannotUndoException;
 import java.io.Serializable;
 import java.util.List;
 
@@ -25,13 +26,14 @@ public class Results<T>  implements Serializable {
     }
 
 
-    public Results(Integer code, String msg, T data, List<T> datas) {
+    public Results(Integer code, String msg, T data, Integer count, List<T> datas) {
         this.code = code;
         this.msg = msg;
         this.data = data;
-//        this.count = count;
+        this.count = count;
         this.datas = datas;
     }
+
 
 
     /* 无数据传输的 成功返回 */
@@ -49,28 +51,28 @@ public class Results<T>  implements Serializable {
 
     /* 单个数据传输的 成功返回 */
     public static <T> Results<T> success(T data) {
-        return new Results<T>( CustomizeErrorCode.SUCCESS.getCode(),  CustomizeErrorCode.SUCCESS.getMessage(), data,  null);
+        return new Results<T>( CustomizeErrorCode.SUCCESS.getCode(),  CustomizeErrorCode.SUCCESS.getMessage(), data, 0, null);
     }
 
     public static <T> Results<T> success(String msg, T data) {
-        return new Results<T>(CustomizeErrorCode.SUCCESS.getCode(), msg, data,  null);
+        return new Results<T>(CustomizeErrorCode.SUCCESS.getCode(), msg, data, 0, null);
     }
 
     public static <T> Results<T> success(CustomizeErrorCode resultCode, T data) {
-        return new Results<T>( resultCode.getCode(),  resultCode.getMessage(), data, null);
+        return new Results<T>( resultCode.getCode(),  resultCode.getMessage(), data, 0, null);
     }
 
     /* 分页数据传输的 成功返回 */
     public static <T> Results<T> success(Integer count, List<T> datas) {
-        return new Results<T>(CustomizeErrorCode.TABLE_SUCCESS.getCode(),CustomizeErrorCode.SUCCESS.getMessage(),null, datas);
+        return new Results<T>(CustomizeErrorCode.TABLE_SUCCESS.getCode(),CustomizeErrorCode.SUCCESS.getMessage(),null,count, datas);
     }
 
     public static <T> Results<T> success(String msg, Integer count, List<T> datas) {
-        return new Results<T>(CustomizeErrorCode.TABLE_SUCCESS.getCode(), msg, null,  datas);
+        return new Results<T>(CustomizeErrorCode.TABLE_SUCCESS.getCode(), msg, null, count, datas);
     }
 
     public static <T> Results<T> success(CustomizeErrorCode resultCode, Integer count, List<T> datas) {
-        return new Results<T>( resultCode.getCode(),  resultCode.getMessage(), null, datas);
+        return new Results<T>( resultCode.getCode(),  resultCode.getMessage(), null, count, datas);
     }
     /* 无数据传输的 失败返回 */
     public static <T> Results<T> failure() {
@@ -81,8 +83,8 @@ public class Results<T>  implements Serializable {
         return new Results<T>( resultCode.getCode(),  resultCode.getMessage());
     }
 
-    public static <T> Results<T> failure(CustomizeException e) {
-        return failure(e.getCode(), e.getMessage());
+    public static <T> Results<T> failure(CustomizeException c) {
+        return new Results<T>( c.getCode(),c.getMessage());
     }
 
     public static <T> Results<T> failure(Integer code, String msg) {

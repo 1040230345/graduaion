@@ -31,7 +31,7 @@ public class CustomizeExceptionHandler {
             if (e instanceof CustomizeException) {
                 resultDTO = Results.failure((CustomizeException) e);
             } else {
-                //log.error("handle error", e.getMessage());
+                log.error("handle error", e);
                 resultDTO = Results.failure(CustomizeErrorCode.SYS_ERROR);
             }
             try {

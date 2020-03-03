@@ -2,6 +2,7 @@ package com.jackson.controller;
 
 import com.jackson.result.Results;
 import com.jackson.service.imp.UserServiceImp;
+import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.mybatis.logging.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import java.util.logging.Logger;
 
 @Controller
 @Slf4j
+@Api(tags = "测试接口")
 public class TestController {
 //    private Logger logger = LoggerFactory.getLogger(TestController.class);
 //
