@@ -25,6 +25,8 @@ public class Results<T>  implements Serializable {
         this.msg = msg;
     }
 
+//    public Results()
+
 
     public Results(Integer code, String msg, T data, Integer count, List<T> datas) {
         this.code = code;

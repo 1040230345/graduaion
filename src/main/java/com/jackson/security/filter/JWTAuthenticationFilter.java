@@ -103,12 +103,12 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException authenticationException) throws IOException {
 //        System.out.println(authenticationException.getMessage());
-        Results resultDTO = new Results();
-
+        Results resultDTO ;
+        logger.info("登录失败了呀弟弟");
 //        response.setHeader("Access-Control-Allow-Origin", "*");
 //        response.setHeader("Access-Control-Allow-Methods", "*");
 //        response.setContentType("application/json;charset=UTF-8");
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+//        response.setStatus(HttpStatus.UNAUTHORIZED.value());
 //        Map<String,Object> map = new HashMap<>();
 //        if(authenticationException instanceof LockedException){
 //            resultDTO = Results.failure(CustomizeErrorCode.SYS_USER_LOCK);
@@ -120,7 +120,11 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 //            resultDTO = Results.failure(CustomizeErrorCode.SYS_NO_USER);
 //        }
         //        response.setContentType("application/json");
-        resultDTO = Results.failure(4003,authenticationException.getMessage());
+        if(authenticationException.getMessage().equals("Bad credentials")){
+            resultDTO = Results.failure(4003,CustomizeErrorCode.SYS_USER_NOFOUND.getMessage());
+        }else {
+            resultDTO = Results.failure(4003,authenticationException.getMessage());
+        }
         response.setContentType("application/json");
         response.setStatus(200);
         response.setCharacterEncoding("utf-8");
