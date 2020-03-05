@@ -133,6 +133,15 @@
 			<artifactId>fastjson</artifactId>
 			<version>1.2.28</version>
 		</dependency>
+
+
+		<!--解析dm格式-->
+		<dependency>
+			<groupId>org.pegdown</groupId>
+			<artifactId>pegdown</artifactId>
+			<version>1.6.0</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>

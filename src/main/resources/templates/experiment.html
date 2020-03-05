@@ -4,7 +4,6 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>实验开始啦</title>
 
-
     <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
 
     <script th:src="@{/editor-master/examples/js/jquery.min.js}"></script>
@@ -21,16 +20,14 @@
 
 <body>
 <div style="margin-left: 100px" id="test">
-    <textarea style="display:none;">
-        ## 哎哟
-![](http://localhost:8090/images/bookImage/9411e66c21524aae9f028521a780c12f.jpg)
-    </textarea>
-</div>
 
+</div>
+<textarea id="myText" style="display:none;" >
+
+    </textarea>
 <script type="text/javascript">
 
-    window.οnlοad=function() {
-        console.log("进来了吗")
+    $(function () {
         $.ajax({
             type: 'GET',
             dataType: "json",
@@ -41,10 +38,17 @@
              },*/
             success: function (res) {
                 if (res.code == 200) {
-                    $("#text").val(res.msg);//赋值
+                    // console.log($("#myText"));
+                    // console.log(res.msg);
+                    var divA = document.getElementById("test");
+                    divA.innerHTML = divA.innerText+res.msg;
+                    //divA.innerHTML +='追加的内容s';
+                    // divA.innerHTML = divA.innerHTML+'<h3>追加内容为H3字体</h3>';
+                    // document.getElementById("myText").value = "## 嘿嘿嘿";
+                    // $("#myText").value(res.msg)
                 } else {
-                    console.log("???")
-                    $("#text").val('解析出错了');//赋值
+                    var divA = document.getElementById("test");
+                    divA.innerHTML = divA.innerText+res.msg;
                 }
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -52,22 +56,19 @@
                 alert(XMLHttpRequest.status);
                 alert(XMLHttpRequest.readyState);
                 alert(textStatus);
-                console.log("???")
+                // console.log("???")
             }
         });
-    }
+    });
 
-
-
-
-    editormd.markdownToHTML("test", {
-        htmlDecode: "style,script,iframe",
-        emoji: true,
-        taskList: true,
-        tex: true,  // 默认不解析
-        flowChart: true,  // 默认不解析
-        sequenceDiagram: true  // 默认不解析
-    })
+    // editormd.markdownToHTML("test", {
+    //     htmlDecode: "style,script,iframe",
+    //     emoji: true,
+    //     taskList: true,
+    //     tex: true,  // 默认不解析
+    //     flowChart: true,  // 默认不解析
+    //     sequenceDiagram: true  // 默认不解析
+    // })
 
 
 </script>
