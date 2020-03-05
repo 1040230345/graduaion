@@ -8,6 +8,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.pegdown.PegDownProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,9 +42,9 @@ public class CurriculumController {
      */
     @PostMapping("/upBookText")
     @ApiOperation("获取老师发送的文本内容")
+    @PreAuthorize("hasAnyRole('ROLE_TEACHER')")
     public Results upBookText(String bookText, HttpServletRequest request){
         request.getSession().setAttribute("text",bookText);
-//        System.out.println(bookText);
         return Results.success("发送成功");
     }
 
@@ -57,7 +58,6 @@ public class CurriculumController {
         String text  = (String)request.getSession().getAttribute("text");
         PegDownProcessor pdp = new PegDownProcessor(Integer.MAX_VALUE);
         String htmlContent = pdp.markdownToHtml(text);
-//        System.out.println(htmlContent);
         return Results.success(htmlContent);
     }
 
