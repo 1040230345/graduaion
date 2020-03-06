@@ -12,4 +12,5 @@ public class Curriculum extends BaseEntity<Integer>{
     private String thumbnail;
     private String synopsis;
     private Integer userId;
+
 }

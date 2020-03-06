@@ -42,7 +42,7 @@ public class CurriculumController {
      */
     @PostMapping("/upBookText")
     @ApiOperation("获取老师发送的文本内容")
-    @PreAuthorize("hasAnyRole('ROLE_TEACHER')")
+//    @PreAuthorize("hasAnyRole('ROLE_TEACHER')")
     public Results upBookText(String bookText, HttpServletRequest request){
         request.getSession().setAttribute("text",bookText);
         return Results.success("发送成功");
