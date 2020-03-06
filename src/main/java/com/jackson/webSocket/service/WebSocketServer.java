@@ -3,6 +3,7 @@ package com.jackson.webSocket.service;
 import java.io.IOException;
 import java.util.Date;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
@@ -40,6 +41,7 @@ public class WebSocketServer {
      * 连接建立成功调用的方法*/
     @OnOpen
     public void onOpen(Session session) {
+//        System.out.println(request.get);
         log.info("客户端连接！");
         this.session = session;
         try {
@@ -52,8 +54,8 @@ public class WebSocketServer {
             sshAgent.execCommand(this);
             //导入环境
 //            this.sshAgent.printWriter.write( "docker pull tomcat "+ "\r\n");
-//            this.sshAgent.printWriter.write( "docker run -p 8080:8080 tomcat "+ "\r\n");
-            //this.sshAgent.printWriter.flush();
+            this.sshAgent.printWriter.write( "docker run -it --name xxx ubuntu:16.04 bash"+ "\r\n");
+            this.sshAgent.printWriter.flush();
         } catch (IOException e) {
             e.printStackTrace();
             log.error("websocket IO异常");
