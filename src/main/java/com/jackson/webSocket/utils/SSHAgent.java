@@ -3,8 +3,10 @@ package com.jackson.webSocket.utils;
 import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.Session;
 import ch.ethz.ssh2.StreamGobbler;
-import com.jackson.webSocket.service.WebSocketServer;
+import com.jackson.webSocket.controller.WebSocketController;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.springframework.stereotype.Component;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -17,6 +19,7 @@ import java.util.concurrent.Executors;
 /**
  * Created by wolfcode-lanxw
  */
+@Component
 public final class SSHAgent {
     private Connection connection;
     private Session session;
@@ -49,7 +52,7 @@ public final class SSHAgent {
         printWriter = new PrintWriter(session.getStdin());
     }
 
-    public void execCommand(final WebSocketServer webSocketServer) throws IOException {
+    public void execCommand(final WebSocketController webSocketServer) throws IOException {
         //执行命令方法，使用线程池来执行
         service.submit(
                 new Runnable() {

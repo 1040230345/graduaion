@@ -29,13 +29,14 @@ public class UserController {
     @GetMapping("/getUser")
     @ApiOperation("获取用户信息")
     public Results getUser(HttpServletRequest request){
-        //从头部中获取token
-        String authorization = request.getHeader(SecurityConstants.TOKEN_HEADER);
-        String token = authorization.replace(SecurityConstants.TOKEN_PREFIX, "");
-        //获取username
-        String username = JwtTokenUtils.getUsernameByToken(token);
-        //获取用户信息
+//        //从头部中获取token
+//        String authorization = request.getHeader(SecurityConstants.TOKEN_HEADER);
+//        String token = authorization.replace(SecurityConstants.TOKEN_PREFIX, "");
+//        //获取username
+        String username = JwtTokenUtils.getUsernameByRequest(request);
+//        //获取用户信息
         return Results.success(userService.getUser(username));
+
     }
 
 }

@@ -1,7 +1,6 @@
-package com.jackson.webSocket.service;
+package com.jackson.webSocket.controller;
 
 import java.io.IOException;
-import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.websocket.OnClose;
@@ -11,18 +10,19 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
+import com.jackson.security.constants.SecurityConstants;
+import com.jackson.webSocket.service.WebSocketService;
 import com.jackson.webSocket.utils.SSHAgent;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @ServerEndpoint(value = "/websocket")
 @Component
 //@Configuration
-public class WebSocketServer {
+public class WebSocketController {
 
     @Value("${myUbuntu.address}")
     private String address = "114.55.218.143";
@@ -37,24 +37,27 @@ public class WebSocketServer {
     private Session session;
     //操作SSH的工具类
     private SSHAgent sshAgent;
+    @Autowired
+    private WebSocketService webSocketService;
     /**
      * 连接建立成功调用的方法*/
     @OnOpen
     public void onOpen(Session session) {
-//        System.out.println(request.get);
         log.info("客户端连接！");
         this.session = session;
         try {
+//            //从头部中获取token
+//            String authorization = request.getHeader(SecurityConstants.TOKEN_HEADER);
+//            String token = authorization.replace(SecurityConstants.TOKEN_PREFIX, "");
             //在客户端通过webSocket连接时，创建一个SSH的会话
             this.sshAgent = new SSHAgent();
-            System.out.println(address);
             //配置
             this.sshAgent.initSession(address, username, password);
             //准备执行命令。
             sshAgent.execCommand(this);
             //导入环境
-//            this.sshAgent.printWriter.write( "docker pull tomcat "+ "\r\n");
-            this.sshAgent.printWriter.write( "docker run -it --name xxx ubuntu:16.04 bash"+ "\r\n");
+//            String command = webSocketService.initContainer(chapterId,token);
+            this.sshAgent.printWriter.write("docker run -it --name xxx ubuntu:16.04 bash"+"\r\n");
             this.sshAgent.printWriter.flush();
         } catch (IOException e) {
             e.printStackTrace();
@@ -66,8 +69,10 @@ public class WebSocketServer {
      */
     @OnClose
     public void onClose() {
+        this.sshAgent.printWriter.write("exit"+"\r\n");
+        this.sshAgent.printWriter.flush();
         this.sshAgent.close();
-        log.info("有一连接关闭！");
+        log.info("连接关闭！");
     }
 
     /**
@@ -79,6 +84,10 @@ public class WebSocketServer {
         log.info("来自客户端的消息:" + message);
         //群发消息
         try {
+            if(message.equals("exit")){
+                this.onClose();
+                return;
+            }
             //通过工具类的标准输入网远程服务器中写内容
             this.sshAgent.printWriter.write( message+ "\r\n");
             this.sshAgent.printWriter.flush();

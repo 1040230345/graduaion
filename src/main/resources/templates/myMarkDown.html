@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>课程编辑页</title>
@@ -8,64 +9,114 @@
     <meta http-equiv="Cache-Control" content="no-cache">
     <meta http-equiv="Expires" content="0">
 
-<!--    <link rel="stylesheet" th:href="@{/layui/xadmin/css/login.css}" />-->
+    <!--    <link rel="stylesheet" th:href="@{/layui/xadmin/css/login.css}" />-->
     <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
-    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
-    <link rel="stylesheet"  th:href="@{/editor-master/css/editormd.css}"/>
+    <link rel="stylesheet" th:href="@{/editor-master/css/editormd.css}" />
     <script type="text/javascript" th:src="@{/editor-master/editormd.js} "></script>
+    <!--
+    <link rel="stylesheet" href="editor-master/css/editormd.css" />
+    <script type="text/javascript" src="editor-master/editormd.js"></script> -->
+
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
 </head>
+
 <body>
-<div id="editormd">
-    <textarea id = "text" style="display:none;" ></textarea>
-</div>
-<div>
-    <div class="btn-group"  >
-        <button type="button" class="btn btn-default" onclick="btnSave()">提交</button>
+<div id="app">
+    <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
+        <el-menu-item index="1">首页</el-menu-item>
+        <el-menu-item index="2">用户名</el-menu-item>
+        <el-submenu index="3">
+            <template slot="title">个人中心</template>
+            <el-menu-item index="3-1">我的信息</el-menu-item>
+            <el-menu-item index="3-2">我的课程</el-menu-item>
+            <el-menu-item index="3-3">我的学习</el-menu-item>
+            <!-- <el-submenu index="3-4">
+                <template slot="title">选项4</template>
+                <el-menu-item index="3-4-1">选项1</el-menu-item>
+                <el-menu-item index="3-4-2">选项2</el-menu-item>
+                <el-menu-item index="3-4-3">选项3</el-menu-item>
+            </el-submenu> -->
+        </el-submenu>
+
+    </el-menu>
+    <div id="editormd">
+        <textarea id="text" style="display:none;"></textarea>
+    </div>
+    <div>
+        <el-button type="primary" class="mybtn" @click="btnSave" :loading="btnstatus">{{btntext}}</el-button>
     </div>
 </div>
-<script type="text/javascript">
-
-    //编辑器的核心
-    $(function() {
-        editormd("editormd", {
-            width: "100%",
-            height: 600,
-            syncScrolling: "single",
-            path: "../editor-master/lib/", //依赖lib文件夹路径
-            emoji: true,
-            taskList: true,
-            tocm: true,
-            imageUpload: true,	//开启本地图片上传
-            imageFormats: ["jpg", "jpeg", "gif", "png"],	//设置上传图片的格式
-            imageUploadURL: "image/upImage"		//上传图片请求路径
-        });
-    });
-
-    //按下后可以获取输入的内容，我会传到数据库的
-    function btnSave() {
-        var text = $("#text").text();
-        console.log(text);
-        let data = {
-            bookText: text
-        }
-        $.ajax({
-            url:"curriculum/upBookText",
-            data:data,
-            dataType:"json",
-            type:"post",
-            success:function(msg){
-                if(msg.code==200){
-                    console.log("成功啦")
-                }else{
-                    console.log("失败啦")
-                }
-            }
-        });
-    }
-</script>
 </body>
+<!-- 引入组件库 -->
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script>
+    var vue = new Vue({
+        el: '#app',
+        data: () => {
+            return {
+                btnstatus: false,
+                btntext: '提交',
+                activeIndex: '1',
+                activeIndex2: '1'
+            }
+        },
+        mounted() {
+            editormd("editormd", {
+                width: "100%",
+                height: 580,
+                syncScrolling: "single",
+                path: "editor-master/lib/", //依赖lib文件夹路径
+                emoji: true,
+                taskList: true,
+                tocm: true,
+                imageUpload: true, //开启本地图片上传
+                imageFormats: ["jpg", "jpeg", "gif", "png"], //设置上传图片的格式
+                imageUploadURL: "image/upImage" //上传图片请求路径
+            });
+        },
+        methods: {
+            btnSave() {
+                var that = this;
+                that.btnstatus = true;
+                that.btntext = '提交中';
+                var text = $("#text").text();
+                let data = {
+                    bookText: text
+                }
+                $.ajax({
+                    url: "curriculum/upBookText",
+                    data: data,
+                    dataType: "json",
+                    type: "post",
+                    success: function(msg) {
+                        if (msg.code == 200) {
+                            that.$notify({
+                                title: '成功',
+                                message: msg.msg,
+                                type: 'success'
+                            });
+                        } else {
+                            that.$notify.error({
+                                title: '错误',
+                                message: msg.msg,
+                            });
+                        }
+                        that.btnstatus = false;
+                        that.btntext = '提交';
+                    }
+                });
+            }
+        }
+    })
+</script>
+<style>
+    .mybtn {
+        float: right;
+        border-radius: 0;
+    }
+</style>
+
 </html>

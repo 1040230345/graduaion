@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import javax.crypto.SecretKey;
+import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.DatatypeConverter;
 import java.util.Arrays;
 import java.util.Date;
@@ -69,6 +70,18 @@ public class JwtTokenUtils {
                 .setSigningKey(secretKey)
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    /**
+     * 解析token
+     */
+    public static String getUsernameByRequest(HttpServletRequest request){
+        //从头部中获取token
+        String authorization = request.getHeader(SecurityConstants.TOKEN_HEADER);
+        String token = authorization.replace(SecurityConstants.TOKEN_PREFIX, "");
+        //获取username
+        String username = JwtTokenUtils.getUsernameByToken(token);
+        return username;
     }
 //    /**
 //     * 刷新token
