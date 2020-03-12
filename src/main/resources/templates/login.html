@@ -1,83 +1,162 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Cache-Control" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<title>登录</title>
-<header th:replace="header::html"></header>
-<link rel="stylesheet" th:href="@{/layui/xadmin/css/login.css}" />
+	<meta charset="UTF-8">
+	<!-- import CSS -->
+	<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+<!--	<link rel="stylesheet" href="element-ui.css">-->
+	<link rel="stylesheet" href="index.css">
+<!--	<script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>-->
+	<title>登录</title>
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
 </head>
 <body>
+<div class="myInput"></div>
+<div id="app" v-cloak>
+	<el-container>
+		<el-main class="main">
+			<div class="demo-image">
+				<div class="block" v-for="fit in fits" :key="fit">
+					<span class="demonstration"></span>
+					<el-image
+							style="width: 100px; height: 100px"
+							:src="url"
+							:fit="fit"></el-image>
+				</div>
+			</div>
+			<el-tabs v-model="activeName" @tab-click="handleClick">
+				<el-tab-pane label="登录" name="first" >
+					<el-input class="myInput" v-model="username" placeholder="请输入账号" @keyup.enter.native="login()" ></el-input><br/>
+					<el-input class="myInput" placeholder="请输入密码" v-model="password" show-password @keyup.enter.native="login()"></el-input><br/>
+					<div>
+						<el-checkbox v-model="checked" style="float: left">记住我</el-checkbox>
+						<div style="float: right">
+							<el-button type="primary" v-on:click="login()":loading="btnstatus">{{btntest}}</el-button>
+						</div>
 
-	<div class="login">
-		<div class="message">实验平台系统</div>
-		<div id="darkbannerwrap"></div>
+					</div>
 
-        <form action="/auth/login" id="login-form" method="post">
-			<input id="username" name="username" placeholder="用户名" type="text" autocomplete="off">
-			<hr class="hr15">
-			<input id="password" name="password" placeholder="密码" type="password" autocomplete="off">
-			<hr class="hr15">
-            <input style="width: 100%;" lay-submit lay-filter="login" type="submit" value="登录">
-			<hr class="hr20">
-			<span id="info" style="color: red"></span>
-		</form>
-	</div>
+				</el-tab-pane>
+				<el-tab-pane label="注册" name="second">
+					<el-input class="myInput" v-model="username" placeholder="请输入账号" ></el-input><br/>
+					<el-input class="myInput" placeholder="请输入密码" v-model="password" show-password ></el-input>
+					<div>
+						<div style="float: left">
+							<el-radio v-model="radio" label="1">学生</el-radio>
+							<el-radio v-model="radio" label="2">老师</el-radio>
+						</div>
+						<div style="float: right">
+							<el-button type="primary" v-on:click="register()">立即注册</el-button>
+						</div>
+					</div>
+
+				</el-tab-pane>
+			</el-tabs>
+
+		</el-main>
+	</el-container>
+
+
+</div>
 </body>
-<script type="text/javascript">
+<!-- import Vue before Element -->
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<!--<script src="vue.js"></script>-->
+<!-- import JavaScript -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<!--<script src="element.js"></script>-->
+<script>
 
-    $(function  () {
-    	let myData ={
-    		username: $("#username").value(),
-			password: $("#password").value(),
-			rememberMe: true
-		}
-		// log.console(JSON.stringify(myData));
-        layui.use('form', function(){
-            var form = layui.form;
-            //监听提交
-            form.on('submit(login)', function(data){
-                $.ajax({
-					type : 'POST',
-					url : '/auth/login',
-					// processData: false,
-					contentType:'application/json;charset=utf-8',
-					//param:$("#login-form").serialize(),
-					'data': JSON.stringify(
-							myData
-					),
-					//data : $("#login-form").serialize(),
-
-					success : function(datas) {
-
-						if(datas.authenticated == true){
-							localStorage.setItem("userId", datas.principal.id);
-                            localStorage.setItem("username", datas.principal.username);
-							localStorage.setItem("nickName", datas.principal.nickname);
-							var authorities = datas.authorities;
-							var permission = [];
-							for(var i in authorities){
-								permission.push(authorities[i].authority);
-							}
-							localStorage.setItem("permission", JSON.stringify(permission));
-							layer.msg("登录成功",{time:500},function(){
-								location.href='/user'
+	new Vue({
+		el: '#app',
+		data() {
+			return {
+				username: '',
+				password: '',
+				activeName: 'first',
+				radio: '1',
+				fits: [ 'contain'],
+				url: '/images/indexImages/docker.jpg',
+				btntest: '立即登录',
+				btnstatus:false,
+				checked: false
+			}
+		},
+		methods: {
+			login(){
+				if(this.username==''){
+					this.$message.error('账号不能为空');
+				}else if(this.password==''){
+					this.$message.error('密码不能为空');
+				}else {
+					axios.post('auth/login', {
+						rememberMe:this.checked,
+						username:this.username,
+						password:this.password
+					}).then((response)=> {
+						console.log(response);
+						if(response.data.code==4003){
+							this.btnstatus = true;
+							this.$notify.error({
+								title: '登录失败',
+								message: response.data.msg
 							});
-						}else{
-							layer.msg("登录异常，请联系管理员");
+							setTimeout(()=>{
+								this.btnstatus = false;
+							},1000
+							)
+						}else if(response.data.code==200){
+							localStorage.setItem("token", response.headers.authorization);
+							console.log(localStorage.getItem("token"))
+							this.btnstatus = true;
+							this.$notify({
+								title: '登录成功',
+								message: '正在跳转',
+								// duration:0,
+								type: 'success'
+							});
+							this.btntext = '正在跳转';
+							setTimeout(()=>{
+								window.location.href="index";
+							},1500)
 						}
-					},
-					error : function(xhr, textStatus, errorThrown) {
-						var msg = xhr.responseText;
-						var response = JSON.parse(msg);
-						layer.msg(response.message);
-					}
-				});
-                return false;
-            });
-        });
-    })
+					}).catch(function (error) {
+						console.log(error);
+					});
+				}
+			},
+
+			// login: function () {
+			// 	 alert(this.password)
+			// 	$.ajax({
+			// 		type: 'POST',
+			// 		dataType: "json",
+			// 		url: "auth/login",
+			// 		data:{
+            //          username:this.username,
+            //          password:this.password
+            //          },
+			// 		success: function (data,textStatus, request,msg) {
+			// 			// alert(console.log(xhr.getAllResponseHeaders())) //响应头部
+			// 			if(msg==200){
+			// 				var token  = request.getResponseHeader('Authorization');
+			// 				localStorage.setItem("token", token);
+			// 			}
+			// 			console.log();
+			// 		},
+			// 		error: function (XMLHttpRequest, textStatus, errorThrown) {
+			// 			//查看错误信息
+			// 			alert(XMLHttpRequest.status);
+			// 			alert(XMLHttpRequest.readyState);
+			// 			alert(textStatus);
+			// 			// console.log("???")
+			// 		}
+			// 	})
+			// },
+			handleClick(tab, event) {
+				// console.log(tab, event);
+			}
+		}
+	})
 </script>
 </html>

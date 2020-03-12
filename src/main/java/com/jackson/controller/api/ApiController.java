@@ -33,4 +33,12 @@ public class ApiController {
         return "myMarkDown";
     }
 
+    /**
+     * 获取主页面
+     */
+    @GetMapping("/index")
+    public String getIndex(){
+        return "index";
+    }
+
 }

@@ -58,7 +58,7 @@ public class CurriculumController {
         String text  = (String)request.getSession().getAttribute("text");
         PegDownProcessor pdp = new PegDownProcessor(Integer.MAX_VALUE);
         String htmlContent = pdp.markdownToHtml(text);
-        System.out.println(htmlContent);
+//        System.out.println(htmlContent);
         return Results.success(htmlContent);
     }
 

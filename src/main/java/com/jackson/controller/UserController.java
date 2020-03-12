@@ -10,6 +10,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -38,5 +39,19 @@ public class UserController {
         return Results.success(userService.getUser(username));
 
     }
+
+    /**
+     * 用户退出
+     */
+    @PostMapping("/loginOut")
+    @ApiOperation("用户退出")
+    public Results loginOut(HttpServletRequest request){
+        //从头部中获取token
+        String authorization = request.getHeader(SecurityConstants.TOKEN_HEADER);
+        String token = authorization.replace(SecurityConstants.TOKEN_PREFIX, "");
+//        System.out.println(token);
+        return userService.loginOut(token);
+    }
+
 
 }

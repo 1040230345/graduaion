@@ -1,6 +1,7 @@
 package com.jackson.service;
 
 import com.jackson.model.SysUser;
+import com.jackson.result.Results;
 
 /**
  * 用户接口
@@ -26,6 +27,11 @@ public interface UserService {
      * @return
      */
     String login(String username,String password);
+
+    /**
+     * 用户退出
+     */
+    Results loginOut(String token);
 
 
 

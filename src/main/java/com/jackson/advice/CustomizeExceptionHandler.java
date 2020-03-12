@@ -23,12 +23,6 @@ import java.io.PrintWriter;
 @Slf4j
 public class CustomizeExceptionHandler {
 
-    public static void main(String[] args) {
-        System.out.println(
-
-        );
-    }
-
     @ExceptionHandler(Exception.class)
     ModelAndView handle(Throwable e, Model model, HttpServletRequest request, HttpServletResponse response) {
         String contentType = request.getContentType();

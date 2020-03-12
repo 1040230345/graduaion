@@ -51,11 +51,11 @@ public class TestController {
         return "如果你看见这句话，说明你有ROLE_USER角色";
     }
 
-    @RequestMapping("/test")
-    @ResponseBody
-    public Results testController(){
-
-        return userServiceImp.testService();
-    }
+//    @RequestMapping("/test")
+//    @ResponseBody
+//    public Results testController(){
+//
+//        return userServiceImp.testService();
+//    }
 
 }

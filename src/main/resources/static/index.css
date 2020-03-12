@@ -1,0 +1,23 @@
+.myInput {
+    margin-bottom: 10px;
+}
+.main{
+    position:fixed;
+    width:400px;
+    height: 400px;
+    text-align: center;
+    top:40%;
+    left:50%;
+    transform: translate(-50%,-50%);
+    /*background: rgba(0,0,0,0.5);*/
+}
+body{
+    background:url("/images/indexImages/loginBg.png");
+    background-size:100vh 100vh;
+}
+[v-cloak] {
+    display: none;
+}
+.el-icon-success {
+    color: #409EFF!important;
+}

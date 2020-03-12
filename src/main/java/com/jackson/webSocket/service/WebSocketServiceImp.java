@@ -8,6 +8,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -25,7 +26,7 @@ public class WebSocketServiceImp implements WebSocketService {
      * @param token
      */
     @Override
-    public String initContainer(Integer chapterId, String token) {
+    public String initContainer(Integer chapterId,String token) {
         //解析token
         String username = JwtTokenUtils.getUsernameByToken(token);
         /**
@@ -34,16 +35,21 @@ public class WebSocketServiceImp implements WebSocketService {
         if(stringRedisTemplate.hasKey(username)){
             //获取容器名称
             String containerName =stringRedisTemplate.opsForValue().get(username);
+            //还未截取
+
+
+
             String command = "docker start -i "+containerName+"\r\n";
             return command;
         }
         //获取docker镜像名称
         String imageName = chapterDao.getDockerPathById(chapterId);
-        String dockerName = getRandomString(18)+imageName;
+        //以，为中间，方便截取
+        String dockerName = getRandomString(18)+","+imageName;
         String command = "docker run -it --name "+dockerName+" "+imageName+" bash"+"\r\n";
 
         //存在redis中
-        stringRedisTemplate.opsForValue().set(username, dockerName,60*60*60+12, TimeUnit.SECONDS);//向redis里存入数据和设置缓存时间
+        stringRedisTemplate.opsForValue().set(username, dockerName,60*60*60+10, TimeUnit.SECONDS);//向redis里存入数据和设置缓存时间
 
         return command;
     }

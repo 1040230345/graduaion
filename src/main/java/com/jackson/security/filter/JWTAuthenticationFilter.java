@@ -48,15 +48,16 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            String username = request.getParameter("username");
-            String password = request.getParameter("password");
-            LoginUser loginUser = new LoginUser();
-            loginUser.setPassword(password);
-            loginUser.setUsername(username);
-            loginUser.setRememberMe(true);
+//            String username = request.getParameter("username");
+//            String password = request.getParameter("password");
+////            System.out.println(username);
+//            LoginUser loginUser = new LoginUser();
+//            loginUser.setPassword(password);
+//            loginUser.setUsername(username);
+//            loginUser.setRememberMe(true);
             //System.out.println(request.toString());
             // 从输入流中获取到登录的信息
-//            LoginUser loginUser = objectMapper.readValue(request.getInputStream(), LoginUser.class);
+            LoginUser loginUser = objectMapper.readValue(request.getInputStream(), LoginUser.class);
 //            System.out.println(loginUser.toString());
             rememberMe.set(loginUser.getRememberMe());
             // 这部分和attemptAuthentication方法中的源码是一样的，
@@ -88,6 +89,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .collect(Collectors.toList());
         // 创建 Token
         String token = JwtTokenUtils.createToken(jwtUser.getUsername(), roles, rememberMe.get());
+
         // Http Response Header 中返回 Token
         response.setHeader(SecurityConstants.TOKEN_HEADER, token);
 
@@ -102,24 +104,8 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException authenticationException) throws IOException {
-//        System.out.println(authenticationException.getMessage());
         Results resultDTO ;
         logger.info("登录失败了呀弟弟");
-//        response.setHeader("Access-Control-Allow-Origin", "*");
-//        response.setHeader("Access-Control-Allow-Methods", "*");
-//        response.setContentType("application/json;charset=UTF-8");
-//        response.setStatus(HttpStatus.UNAUTHORIZED.value());
-//        Map<String,Object> map = new HashMap<>();
-//        if(authenticationException instanceof LockedException){
-//            resultDTO = Results.failure(CustomizeErrorCode.SYS_USER_LOCK);
-//        }else if(authenticationException instanceof BadCredentialsException){
-//            resultDTO = Results.failure(CustomizeErrorCode.SYS_USER_NOFOUND);
-//        }else if(authenticationException instanceof AccountExpiredException){
-//            resultDTO = Results.failure(CustomizeErrorCode.SYS_USER_DELETE);
-//        }else{
-//            resultDTO = Results.failure(CustomizeErrorCode.SYS_NO_USER);
-//        }
-        //        response.setContentType("application/json");
         if(authenticationException.getMessage().equals("Bad credentials")){
             resultDTO = Results.failure(4003,CustomizeErrorCode.SYS_USER_NOFOUND.getMessage());
         }else {

@@ -13,7 +13,7 @@ public class SysUser extends BaseEntity<Integer>{
     private String username;
     private String password;
     private String nickname;
-    private String headImgUrl;
+    private String headImageUrl;
     private String phone;
     private String email;
     private Integer sex;

@@ -8,6 +8,7 @@ import javax.websocket.OnError;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
+import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
 import com.jackson.security.constants.SecurityConstants;
@@ -19,7 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
-@ServerEndpoint(value = "/websocket")
+@ServerEndpoint(value = "/websocket/{chapterId}/{token}")
 @Component
 //@Configuration
 public class WebSocketController {
@@ -42,13 +43,10 @@ public class WebSocketController {
     /**
      * 连接建立成功调用的方法*/
     @OnOpen
-    public void onOpen(Session session) {
+    public void onOpen(@PathParam("chapterId") Integer chapterId, Session session,@PathParam("token") String token) {
         log.info("客户端连接！");
         this.session = session;
         try {
-//            //从头部中获取token
-//            String authorization = request.getHeader(SecurityConstants.TOKEN_HEADER);
-//            String token = authorization.replace(SecurityConstants.TOKEN_PREFIX, "");
             //在客户端通过webSocket连接时，创建一个SSH的会话
             this.sshAgent = new SSHAgent();
             //配置
@@ -56,8 +54,8 @@ public class WebSocketController {
             //准备执行命令。
             sshAgent.execCommand(this);
             //导入环境
-//            String command = webSocketService.initContainer(chapterId,token);
-            this.sshAgent.printWriter.write("docker run -it --name xxx ubuntu:16.04 bash"+"\r\n");
+            String command = webSocketService.initContainer(chapterId,token);
+            this.sshAgent.printWriter.write(command);
             this.sshAgent.printWriter.flush();
         } catch (IOException e) {
             e.printStackTrace();
