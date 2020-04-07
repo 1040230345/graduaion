@@ -55,9 +55,6 @@
                                 <el-link @click="show = !show" type="primary" :underline="false" style="display: block;margin-top: 6px;text-align: center;">更换头像</el-link>
 
                                 <div style="display: flex;  height: 200px;display: block;margin-top: 6px;text-align: center;">
-<!--                                    <transition name="el-zoom-in-center">-->
-<!--                                        <div v-show="show" class="transition-box" style="margin-right:0px">.el-zoom-in-center</div>-->
-<!--                                    </transition>-->
                                     <transition name="el-zoom-in-center">-->
                                     <el-upload v-show="show"
                                             class="transition-box" style="margin-right:0px"
@@ -68,44 +65,14 @@
                                             list-type="picture-card"
                                             :auto-upload="false">
                                         <i slot="default" class="el-icon-plus"></i>
-<!--                                        <div slot="file" slot-scope="{file,filelist}">-->
-<!--                                            <img-->
-<!--                                                    class="el-upload-list__item-thumbnail"-->
-<!--                                                    :src="file.url" alt=""-->
-<!--                                            >-->
-<!--                                            <span class="el-upload-list__item-actions">-->
-<!--                                        <span-->
-<!--                                                class="el-upload-list__item-preview"-->
-<!--                                                @click="handlePictureCardPreview(file)"-->
-<!--                                        >-->
-<!--                                          <i class="el-icon-zoom-in"></i>-->
-<!--                                        </span>-->
-<!--                                        <span-->
-<!--                                                v-if="!disabled"-->
-<!--                                                class="el-upload-list__item-delete"-->
-<!--                                                @click="handleDownload(file)"-->
-<!--                                        >-->
-<!--                                          <i class="el-icon-download"></i>-->
-<!--                                        </span>-->
-<!--                                        <span-->
-<!--                                                v-if="!disabled"-->
-<!--                                                class="el-upload-list__item-delete"-->
-<!--                                                @click="handleRemove(file)"-->
-<!--                                        >-->
-<!--                                          <i class="el-icon-delete"></i>-->
-<!--                                        </span>-->
-<!--                                      </span>-->
-<!--                                        </div>-->
                                     </el-upload>
                                     </transition>
                                     <el-dialog :visible.sync="dialogVisible">
                                         <img width="100%" :src="dialogImageUrl" alt="">
                                     </el-dialog>
-
                                 </div>
                             </div>
-
-                            </div>
+                        </div>
                         <div style="float: left;padding-left: 40px">
                             <div>
                                 <label style="display: block;margin-bottom: 6px">昵称:</label>
@@ -124,15 +91,15 @@
                             <div>
                                 <label style="display: block;margin-bottom: 6px">phone:</label>
                                 <el-input
-                                        placeholder="root"
-                                        v-model="nickname">
+                                        placeholder="13556670360"
+                                        v-model="phone">
                                 </el-input>
                             </div>
                             <div>
                                 <label style="display: block;margin-bottom: 6px;margin-top: 30px">性别:</label>
                                 <el-input
-                                        placeholder="root"
-                                        v-model="nickname">
+                                        placeholder="男"
+                                        v-model="sex">
                                 </el-input>
                             </div>
                         </div>
@@ -140,8 +107,8 @@
                             <div>
                                 <label style="display: block;margin-bottom: 6px">email:</label>
                                 <el-input
-                                        placeholder="root"
-                                        v-model="nickname">
+                                        placeholder="1040230345@qq.com"
+                                        v-model="email">
                                 </el-input>
                             </div>
                             <div>

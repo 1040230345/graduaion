@@ -1,15 +1,17 @@
 package com.jackson.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
-
-import java.util.Date;
 
 /**
  * 用户模型
  */
 @Data
-public class SysUser extends BaseEntity<Integer>{
+public class SysUser extends BaseEntity{
+
+    @TableId(value = "id",type = IdType.AUTO)
+    private Integer id;
     private String username;
     private String password;
     private String nickname;
@@ -18,7 +20,6 @@ public class SysUser extends BaseEntity<Integer>{
     private String email;
     private Integer sex;
     private Integer status;
-    private String intro;
 
     public interface Status {
         int DISABLED = 0;

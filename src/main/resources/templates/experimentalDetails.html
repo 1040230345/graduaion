@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>实验内容发布与删除</title>
+    <link rel="stylesheet" th:href="@{/myIndexCss/style.css}">
+
+    <!-- import CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+
+    <!-- import Vue before Element -->
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <!-- import JavaScript -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+<style>
+    [v-cloak] {
+        display: none;
+    }
+    .line {
+        text-align: center;
+    }
+</style>
+<div id="app" v-cloak>
+    <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
+        <el-menu-item index="1">
+            <img src="/images/indexImages/docker.jpg" style="height: 40px"/>
+        </el-menu-item>
+        <!--				<el-menu-item index="2" >处理中心</el-menu-item>-->
+        <el-menu-item index="2" style="float: right" v-if="nickName=='未登录'"><a href="/login">请登录</a></el-menu-item>
+        <el-submenu index="2" style="float: right" v-else>
+            <template slot="title" ><i class="el-icon-loading" v-if="nickName==null"></i>{{nickName }}</template>
+            <el-menu-item index="2-1">个人中心</el-menu-item>
+            <el-menu-item index="2-2">我的课程</el-menu-item>
+            <el-menu-item index="2-3" v-on:click="outLogin()">退出登录</el-menu-item>
+        </el-submenu>
+        <el-menu-item style="float: right" index="3" v-if="isLogin==true">
+
+            <i class="el-icon-loading" v-if="headImageUrl==null "></i>
+            <div v-else>
+                <el-avatar :src="headImageUrl"></el-avatar>
+            </div>
+        </el-menu-item>
+        <!--				<el-menu-item index="4" style="float: right" disabled><a href="https://www.ele.me" target="_blank">{{nickName}}</a></el-menu-item>-->
+    </el-menu>
+    <div class="goods1 w">
+    <template>
+        <el-tabs v-model="activeName" >
+            <el-tab-pane label="我的实验" name="first">
+                <div class="project1 clearfix" v-loading="loading" style="margin-bottom: 60px;">
+                    <ul>
+                        <li v-for="item in items" >
+                            <!--						<img :src="item.thumbnail" class="hot" alt="">-->
+                            <a href="#"><img :src="item.thumbnail" alt=""></a>
+                            <p>{{item.title}}</p>
+                            <p class="level"><span>高级</span>  {{item.createTime}}</p>
+                            <el-button>默认按钮</el-button>
+                            <el-button style="float: right">默认按钮</el-button>
+                        </li>
+                    </ul>
+                </div>
+            </el-tab-pane>
+            <el-tab-pane label="实验发布" name="second">
+                <div style="margin-top: 20px;overflow: hidden;color:#C0C4CC;position:relative">
+                    <div class="demo-image" style="float: left">
+                        <div class="block" v-for="fit in fits" :key="fit">
+                            <el-image
+                                    style="width: 200px; height: 200px;border-radius: 50%"
+                                    :src="url"
+                                    :fit="fit"></el-image>
+                            <el-link @click="show = !show" type="primary" :underline="false" style="display: block;margin-top: 6px;text-align: center;">更换缩略图</el-link>
+
+                            <div style="display: flex;  height: 200px;display: block;margin-top: 6px;text-align: center;">
+                                <transition name="el-zoom-in-center">-->
+                                    <el-upload v-show="show"
+                                               class="transition-box" style="margin-right:0px"
+                                               action="#"
+                                               :limit="1"
+                                               :on-change="change"
+                                               :on-remove="handleRemove"
+                                               list-type="picture-card"
+                                               :auto-upload="false">
+                                        <i slot="default" class="el-icon-plus"></i>
+
+                                    </el-upload>
+                                </transition>
+                                <el-dialog :visible.sync="dialogVisible">
+                                    <img width="100%" :src="dialogImageUrl" alt="">
+                                </el-dialog>
+
+                            </div>
+                        </div>
+                    </div>
+                <div style="float: left;padding-left: 40px">
+                    <div>
+                        <label style="display: block;margin-bottom: 6px">实验标题
+                            <el-input
+                                    style="margin-top: 6px"
+                                    placeholder="请输入实验标题"
+                                    v-model="nickname">
+                            </el-input>
+                        </label>
+                    </div>
+                    <div>实验内容
+                        <label style="display: block;margin-bottom: 6px;margin-top:6px;height: 50px">
+                            <el-col :span="11">
+                                <el-input
+                                        placeholder="请输入实验内容"
+                                        v-model="nickname">
+                                </el-input>
+                            </el-col>
+                            <el-col class="line" :span="2">-</el-col>
+                            <el-col :span="11">
+                                <el-input
+                                        v-model="nickname"
+                                        placeholder="latest">
+                                </el-input>
+                            </el-col>
+                        </label>
+                    </div>
+                    <div>
+                        <label style="display: block;margin-bottom: 6px">实验介绍
+                            <el-input
+                                    style="margin-top: 6px"
+                                    placeholder="请输入实验介绍"
+                                    v-model="nickname">
+                            </el-input>
+                        </label>
+                    </div>
+                </div>
+                <div style="position:absolute;top:280px;left:50%;transform: translateX(-50%)">
+                    <el-button type="primary">修改信息</el-button>
+                    <el-button type="info">重置</el-button>
+                </div>
+
+            </div>
+            </el-tab-pane>
+            <el-tab-pane label="我的留言" name="third">我的留言</el-tab-pane>
+        </el-tabs>
+    </template>
+    </div>
+
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: function() {
+            return {
+                dialogImageUrl: '',
+                dialogVisible: false,
+                disabled: false,
+                show: false,
+                dialogTableVisible: false,
+                status:'',
+                checked: true,
+                activeName: 'first',
+                nickName:'未登录',
+                load:false,
+                headImageUrl:null,
+                isLogin:'',
+                items:[],
+                loading: true,
+                tabPosition: 'top',
+                fits: ['fill'],
+                url: 'http://img.taodabai.com/upload/13/f9/13f99f6ca1ff69fa6a468ce2b2ad09e5.jpg'
+            }
+        },
+        created(){
+
+            console.log(localStorage.getItem("token"))
+            // this.getUser()
+            axios.get('curriculum/getCurriculumList',
+                {
+                    params: {
+                        startPosition:1
+                    }
+                },).then((res)=>{
+                console.log(res)
+                this.items=res.data.datas;
+                this.loading= false
+            })
+
+        },
+        methods: {
+            change(file,filelist){
+                if(filelist.length==1){
+                    document.querySelector('.el-upload--picture-card').style.display="none";
+                }else{
+                    document.querySelector('.el-upload--picture-card').style.display="inline-block";
+                }
+                console.log(filelist)
+            },
+            handleRemove(file,filelist) {
+                filelist.pop();
+                setTimeout(()=>{
+                    this.change(file,filelist);
+                },800);
+            },
+            handlePictureCardPreview(file) {
+                this.dialogImageUrl = file.url;
+                this.dialogVisible = true;
+            },
+            handleDownload(file) {
+                console.log(file);
+            }
+        }
+        })
+</script>
+</body>
+</html>

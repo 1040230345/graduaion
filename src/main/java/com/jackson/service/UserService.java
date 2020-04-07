@@ -15,18 +15,9 @@ public interface UserService {
 
     /**
      * 用户注册
-     * @param umsAdminParam
      * @return
      */
-    SysUser register(SysUser umsAdminParam);
-
-    /**
-     * 用户登录
-     * @param username
-     * @param password
-     * @return
-     */
-    String login(String username,String password);
+    Results register(String username,String password,Integer userType);
 
     /**
      * 用户退出

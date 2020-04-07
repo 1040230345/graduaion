@@ -46,7 +46,7 @@
 							<el-radio v-model="radio" label="2">老师</el-radio>
 						</div>
 						<div style="float: right">
-							<el-button type="primary" v-on:click="register()">立即注册</el-button>
+							<el-button type="primary" v-on:click="register()":loading="btnstatus">{{registeredBtn}}</el-button>
 						</div>
 					</div>
 
@@ -78,11 +78,60 @@
 				fits: [ 'contain'],
 				url: '/images/indexImages/docker.jpg',
 				btntest: '立即登录',
+				registeredBtn:'立即注册',
 				btnstatus:false,
 				checked: false
 			}
 		},
 		methods: {
+			register(){
+				if(this.username==''){
+					this.$message.error('账号不能为空');
+				}else if(this.password==''){
+					this.$message.error('密码不能为空');
+				} else {
+					axios({
+						method: 'post',
+						url: '/user/addUser',
+						params:{
+							userType:this.radio,
+							username:this.username,
+							password:this.password
+						},
+					}).then((response)=> {
+
+						console.log(response);
+						if(response.data.code==200){
+							localStorage.setItem("token", response.data.data);
+							console.log(localStorage.getItem("token"))
+							this.btnstatus = true;
+							this.$notify({
+								title: '注册成功',
+								message: '正在跳转',
+								// duration:0,
+								type: 'success'
+							});
+							this.btntext = '正在跳转';
+							setTimeout(()=>{
+								window.location.href="index";
+							},1500)
+						}else{
+							this.btnstatus = true;
+							this.$notify.error({
+								title: '注册失败',
+								message: response.data.msg
+							});
+							setTimeout(()=>{
+										this.btnstatus = false;
+									},1000
+							)
+						}
+					}).catch(function (error) {
+						console.log(error);
+					});
+				}
+
+			},
 			login(){
 				if(this.username==''){
 					this.$message.error('账号不能为空');
@@ -125,34 +174,6 @@
 					});
 				}
 			},
-
-			// login: function () {
-			// 	 alert(this.password)
-			// 	$.ajax({
-			// 		type: 'POST',
-			// 		dataType: "json",
-			// 		url: "auth/login",
-			// 		data:{
-            //          username:this.username,
-            //          password:this.password
-            //          },
-			// 		success: function (data,textStatus, request,msg) {
-			// 			// alert(console.log(xhr.getAllResponseHeaders())) //响应头部
-			// 			if(msg==200){
-			// 				var token  = request.getResponseHeader('Authorization');
-			// 				localStorage.setItem("token", token);
-			// 			}
-			// 			console.log();
-			// 		},
-			// 		error: function (XMLHttpRequest, textStatus, errorThrown) {
-			// 			//查看错误信息
-			// 			alert(XMLHttpRequest.status);
-			// 			alert(XMLHttpRequest.readyState);
-			// 			alert(textStatus);
-			// 			// console.log("???")
-			// 		}
-			// 	})
-			// },
 			handleClick(tab, event) {
 				// console.log(tab, event);
 			}

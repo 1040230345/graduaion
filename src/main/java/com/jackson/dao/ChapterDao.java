@@ -7,6 +7,6 @@ import org.apache.ibatis.annotations.Select;
 @Mapper
 public interface ChapterDao {
     //查询docker镜像名称
-    @Select("select dockerPath from chapter where id = #{chapterId}")
+    @Select("select docker_path from chapter where id = #{chapterId}")
     String getDockerPathById(@Param("chapterId") Integer chapterId);
 }

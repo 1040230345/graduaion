@@ -37,6 +37,24 @@ mybatis:
   configuration:
     mapUnderscoreToCamelCase: true
 
+##mapper
+mybatis-plus:
+  mapper-locations: 'classpath:mapper/**/*.xml'
+  #实体扫描，多个package用逗号或者分号分隔
+  global-config:
+    #字段策略 0:"忽略判断",1:"非 NULL 判断"),2:"非空判断"
+    field-strategy: 2
+    #驼峰下划线转换
+    db-column-underline: true
+    #刷新mapper 调试神器
+    refresh-mapper: true
+  #    sql-injector: com.baomidou.mybatisplus.mapper.LogicSqlInjector
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+#    log-impl: org.apache.ibatis.logging.log4j2.Log4j2Impl
+
 server:
   port: 8090
 

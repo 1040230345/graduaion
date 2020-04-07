@@ -7,7 +7,8 @@ import lombok.Data;
  * 2020年03月03日15:51:23
  */
 @Data
-public class Curriculum extends BaseEntity<Integer>{
+public class Curriculum extends BaseEntity{
+    private Integer id;
     private String title;
     private String thumbnail;
     private String synopsis;

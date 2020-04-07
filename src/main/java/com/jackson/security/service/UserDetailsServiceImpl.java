@@ -1,7 +1,5 @@
 package com.jackson.security.service;
 
-import com.jackson.exception.CustomizeErrorCode;
-import com.jackson.exception.CustomizeException;
 import com.jackson.model.SysRole;
 import com.jackson.model.SysRoleUser;
 import com.jackson.model.SysUser;
@@ -17,7 +15,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -43,13 +40,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
 
         SysUser sysUser = userService.getUser(username);
-//        if (sysUser == null) {
-//            throw new CustomizeException(CustomizeErrorCode.SYS_NO_USER);
-//        } else if (sysUser.getStatus() == SysUser.Status.LOCKED) {
-//            throw new CustomizeException(CustomizeErrorCode.SYS_USER_LOCK);
-//        } else if (sysUser.getStatus() == SysUser.Status.DISABLED) {
-//            throw new CustomizeException(CustomizeErrorCode.SYS_USER_DELETE);
-//        }
+
         if (sysUser == null) {
             throw new AuthenticationCredentialsNotFoundException("用户名不存在");
         } else if (sysUser.getStatus() == SysUser.Status.LOCKED) {
@@ -57,8 +48,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         } else if (sysUser.getStatus() == SysUser.Status.DISABLED) {
             throw new DisabledException("用户已作废");
         }
-
-//		GrantedAuthority userRoles = new SimpleGrantedAuthority(role.getName())
 
         // 添加权限
         List<SysRoleUser> userRoles = sysUserRoleService.listByUserId(sysUser.getId());

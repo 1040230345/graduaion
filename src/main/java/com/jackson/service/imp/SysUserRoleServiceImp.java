@@ -1,6 +1,6 @@
 package com.jackson.service.imp;
 
-import com.jackson.dao.UserRoleDao;
+import com.jackson.dao.UserRoleMapper;
 import com.jackson.model.SysRoleUser;
 import com.jackson.service.SysUserRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +11,7 @@ import java.util.List;
 @Service
 public class SysUserRoleServiceImp implements SysUserRoleService {
     @Autowired
-    private UserRoleDao userRoleDao;
+    private UserRoleMapper userRoleMapper;
 
     /**
      * 获取用户角色列表
@@ -20,7 +20,7 @@ public class SysUserRoleServiceImp implements SysUserRoleService {
      */
     @Override
     public List<SysRoleUser> listByUserId(Integer userId) {
-        return userRoleDao.listByUserId(userId);
+        return userRoleMapper.listByUserId(userId);
     }
 
 }

@@ -9,10 +9,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -30,14 +27,21 @@ public class UserController {
     @GetMapping("/getUser")
     @ApiOperation("获取用户信息")
     public Results getUser(HttpServletRequest request){
-//        //从头部中获取token
-//        String authorization = request.getHeader(SecurityConstants.TOKEN_HEADER);
-//        String token = authorization.replace(SecurityConstants.TOKEN_PREFIX, "");
-//        //获取username
+        //获取username
         String username = JwtTokenUtils.getUsernameByRequest(request);
-//        //获取用户信息
+        //获取用户信息
         return Results.success(userService.getUser(username));
 
+    }
+
+    /**
+     * 用户注册
+     */
+    @PostMapping("/addUser")
+    @ApiOperation("用户注册")
+    public Results addUser(String username,String password,Integer userType){
+        System.out.println(username+password+userType);
+        return userService.register(username, password, userType);
     }
 
     /**
@@ -49,7 +53,6 @@ public class UserController {
         //从头部中获取token
         String authorization = request.getHeader(SecurityConstants.TOKEN_HEADER);
         String token = authorization.replace(SecurityConstants.TOKEN_PREFIX, "");
-//        System.out.println(token);
         return userService.loginOut(token);
     }
 
