@@ -29,7 +29,8 @@ public enum CustomizeErrorCode implements ICustomizeErrorCode {
     SYS_USER_DELETE(2015,"用户已作废"),
     SYS_USER_NOFOUND(2016,"密码错误"),
     SYS_TOKEN_NOTIME(2017,"token已经过期"),
-    SYS_TOKEN_ERROR(2018,"TOKEN错误，请勿非法请求")
+    SYS_TOKEN_ERROR(2018,"TOKEN错误，请勿非法请求"),
+    SYS_USER_IS_HAVA(2019,"用户名已经存在")
 
     ;
 

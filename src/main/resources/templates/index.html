@@ -190,21 +190,25 @@
 									headers: {'Authorization':localStorage.getItem("token") }
 								}
 						).then((res)=>{
-							if(res.headers.authorization){
-								this.$message.error('token刷新成功');
-								console.log("进来了")
-								// this.created()
-								return this.getUser()
-							}
-							console.log(res)
-							if(res.data.data.nickname){
-								this.nickName = res.data.data.nickname;
+							// if(res.headers.authorization){
+							// 	this.$message.error('token刷新成功');
+							// 	console.log("进来了")
+							// 	// this.created()
+							// 	return this.getUser()
+							// }
+							if(res.data.code==200){
+								if(res.data.data.nickname){
+									this.nickName = res.data.data.nickname;
+								}else {
+									this.nickName = "实验者"
+								}
 								if(res.data.data.headImageUrl){
-									this.headImageUrl = 'http://'+res.data.data.headImageUrl;
+									this.headImageUrl = res.data.data.headImageUrl;
 								}else {
 									this.headImageUrl = 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
 								}
 							}
+
 						})
 					}
 				},

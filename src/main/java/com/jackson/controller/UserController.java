@@ -40,7 +40,6 @@ public class UserController {
     @PostMapping("/addUser")
     @ApiOperation("用户注册")
     public Results addUser(String username,String password,Integer userType){
-        System.out.println(username+password+userType);
         return userService.register(username, password, userType);
     }
 
