@@ -6,13 +6,17 @@
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <link rel="stylesheet" href="index.css">
     <title>个人中心</title>
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <link rel="stylesheet" th:href="@{/myIndexCss/style.css}">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+
+    <!-- import Vue before Element -->
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <!-- import JavaScript -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 </head>
-<script src="https://unpkg.com/vue/dist/vue.js"></script>
-<!--<script src="vue.js"></script>-->
-<!-- import JavaScript -->
-<script src="https://unpkg.com/element-ui/lib/index.js"></script>
 <style>
     [v-cloak] {
         display: none;
@@ -39,7 +43,6 @@
                     <el-avatar :src="headImageUrl"></el-avatar>
                 </div>
             </el-menu-item>
-            <!--				<el-menu-item index="4" style="float: right" disabled><a href="https://www.ele.me" target="_blank">{{nickName}}</a></el-menu-item>-->
         </el-menu>
         <div class="goods1 w">
         <template>
@@ -77,28 +80,27 @@
                             <div>
                                 <label style="display: block;margin-bottom: 6px">昵称:</label>
                                 <el-input
-                                        placeholder="root"
+                                        :placeholder="nickName"
                                         v-model="nickname">
                                 </el-input>
                             </div>
                             <div>
                                 <el-link  type="primary" :underline="false" style="display: block;margin-bottom: 6px;margin-top: 30px">更换密码</el-link>
-                                <!--                                <label style="display: block;margin-bottom: 6px;margin-top: 30px"><el-link type="primary"></el-link></label>-->
-                                <el-input placeholder="root" v-model="password" show-password ></el-input>
+                                <el-input :placeholder="password" v-model="password" show-password ></el-input>
                             </div>
                         </div>
                         <div style="float: left;padding-left: 40px">
                             <div>
                                 <label style="display: block;margin-bottom: 6px">phone:</label>
                                 <el-input
-                                        placeholder="13556670360"
+                                        :placeholder="phone"
                                         v-model="phone">
                                 </el-input>
                             </div>
                             <div>
                                 <label style="display: block;margin-bottom: 6px;margin-top: 30px">性别:</label>
                                 <el-input
-                                        placeholder="男"
+                                        :placeholder="sex"
                                         v-model="sex">
                                 </el-input>
                             </div>
@@ -107,7 +109,7 @@
                             <div>
                                 <label style="display: block;margin-bottom: 6px">email:</label>
                                 <el-input
-                                        placeholder="1040230345@qq.com"
+                                        :placeholder="email"
                                         v-model="email">
                                 </el-input>
                             </div>
@@ -171,10 +173,18 @@
                 loading: true,
                 tabPosition: 'top',
                 fits: ['fill'],
-                url: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'
+                url: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg',
+                phone: "",
+                sex: "",
+                email: ""
             }
         },
-        create(){
+        created(){
+            console.log(localStorage.getItem("token"))
+            this.getUser()
+
+        },
+        mounted(){
 
         },
         methods:{
@@ -198,8 +208,67 @@
             },
             handleDownload(file) {
                 console.log(file);
-            }
-        }
+            },
+            getUser(){
+                console.log(localStorage.getItem("token"))
+                if(localStorage.getItem("token")){
+                    this.isLogin=true;
+                    this.nickName=null;
+                    axios.get('user/getUser',
+                        {
+                            headers: {'Authorization':localStorage.getItem("token") }
+                        }
+                    ).then((res)=>{
+                        if(res.data.code==200){
+                            if(res.data.data.nickname){
+                                this.nickName = res.data.data.nickname;
+                            }else {
+                                this.nickName = "实验者"
+                            }
+                            if(res.data.data.headImageUrl){
+                                this.headImageUrl = res.data.data.headImageUrl;
+                            }else {
+                                this.headImageUrl = 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
+                            }
+                            this.phone = res.data.data.phone;
+                            this.password = res.data.data.password;
+                            this.email = res.data.data.email;
+                            if(res.data.data.status == 1){
+                                this.checked = true;
+                            }else {
+                                this.checked = false;
+                            }
+                            if(res.data.data.sex == 1){
+                                this.sex = "男";
+                            }else {
+                                this.sex = "女";
+                            }
+
+                        }
+
+                    })
+                }
+            },
+            outLogin(){
+                axios.post('user/loginOut',{},
+                    {
+                        headers: {'Authorization':localStorage.getItem("token") }
+                    }
+                ).then((res)=>{
+                    console.log(res)
+                    if(res.data.code==200){
+                        this.$message({
+                            message: '退出成功啦',
+                            type: 'success'
+                        });
+                        localStorage.removeItem("token");
+                        this.nickName = '未登录'
+                        this.isLogin=false
+                    }
+
+                })
+            },
+        },
     })
 </script>
 </html>

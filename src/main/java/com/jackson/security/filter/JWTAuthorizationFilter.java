@@ -1,14 +1,15 @@
 package com.jackson.security.filter;
 
+import com.alibaba.fastjson.JSON;
 import com.jackson.exception.CustomizeErrorCode;
 import com.jackson.exception.CustomizeException;
 import com.jackson.myUtils.RedisUtils;
+import com.jackson.result.Results;
 import com.jackson.security.constants.SecurityConstants;
 import com.jackson.security.utils.JwtTokenUtils;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,13 +19,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.WebApplicationContextUtils;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -70,7 +71,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
         }
 
         // 如果请求头中有token，则进行解析，并且设置授权信息
-        SecurityContextHolder.getContext().setAuthentication(getAuthentication(authorization));
+        SecurityContextHolder.getContext().setAuthentication(getAuthentication(authorization,response));
         //将token放在响应头里
 //        response.setHeader(SecurityConstants.TOKEN_HEADER, token);
 
@@ -80,7 +81,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
     /**
      * 获取用户认证信息 Authentication
      */
-    private UsernamePasswordAuthenticationToken getAuthentication(String authorization) {
+    private UsernamePasswordAuthenticationToken getAuthentication(String authorization,HttpServletResponse response) throws IOException {
         String token = authorization.replace(SecurityConstants.TOKEN_PREFIX, "");
         try {
             String username = JwtTokenUtils.getUsernameByToken(token);
@@ -93,24 +94,14 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
             }
         } catch (SignatureException | ExpiredJwtException | MalformedJwtException | IllegalArgumentException exception) {
             //已经过期捕获
-//            if (exception instanceof ExpiredJwtException) {
-////                throw new CustomizeException(CustomizeErrorCode.SYS_TOKEN_NOTIME);
-//                //生成新的token
-////                ((ExpiredJwtException) exception).getClaims().get("rol");
-//                //System.out.println(((ExpiredJwtException) exception).getClaims().get("sub"));
-//                List<String> list = new ArrayList<>();
-//                list.add((String) ((ExpiredJwtException) exception).getClaims().get("rol"));
-//                String newtoken = JwtTokenUtils.createToken((String)((ExpiredJwtException) exception).getClaims().get("sub"),list , false);
-//                System.out.println(newtoken);
-////                System.out.println(JwtTokenUtils.getUserRolesByToken(newtoken));
-////                // 通过 token 获取用户具有的角色
-////                List<SimpleGrantedAuthority> userRolesByToken = JwtTokenUtils.getUserRolesByToken(newtoken);
-//                // Http Response Header 中返回 Token
-//                httpServletResponse.setHeader(SecurityConstants.TOKEN_HEADER, newtoken);
-////
-////                return new UsernamePasswordAuthenticationToken((String) ((ExpiredJwtException) exception).getClaims().get("rol"),
-////                        null, userRolesByToken);
-//            }
+            if (exception instanceof ExpiredJwtException) {
+                Results resultDTO = Results.failure(CustomizeErrorCode.SYS_TOKEN_NOTIME);
+                response.setStatus(200);
+                response.setCharacterEncoding("utf-8");
+                PrintWriter writer = response.getWriter();
+                writer.write(JSON.toJSONString(resultDTO));
+                writer.close();
+            }
             logger.warning("Request to parse JWT with invalid signature . Detail : " + exception.getMessage());
         }
         return null;
