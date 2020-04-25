@@ -55,5 +55,14 @@ public class UserController {
         return userService.loginOut(token);
     }
 
+    /**
+     * 更换头像
+     */
+    @PutMapping("/userImage")
+    @ApiOperation("更改用户头像")
+    public Results updateUserImage(){
+        return null;
+    }
+
 
 }

@@ -17,10 +17,11 @@ import com.jackson.webSocket.utils.SSHAgent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 @Slf4j
-@ServerEndpoint(value = "/websocket")
+@ServerEndpoint(value = "/websocket/{id}/{token}")
 @Component
 //@Configuration
 public class WebSocketController {
@@ -38,12 +39,18 @@ public class WebSocketController {
     private Session session;
     //操作SSH的工具类
     private SSHAgent sshAgent;
-    @Autowired
-    private WebSocketService webSocketService;
+
+    private static ApplicationContext applicationContext;
+
+    public static void setApplicationContext(ApplicationContext applicationContext) {
+        WebSocketController.applicationContext = applicationContext;
+    }
+
     /**
      * 连接建立成功调用的方法*/
     @OnOpen
-    public void onOpen(Session session) {
+    public void onOpen(Session session,@PathParam("id") Integer id,
+                       @PathParam("token") String token) {
         log.info("客户端连接！");
         this.session = session;
         try {
@@ -54,9 +61,11 @@ public class WebSocketController {
             //准备执行命令。
             sshAgent.execCommand(this);
             //导入环境
-//            String command = webSocketService.initContainer(chapterId,token);
-//            this.sshAgent.printWriter.write(command);
-            this.sshAgent.printWriter.write("docker run -it --name xxx ubuntu:16.04 bash"+"\r\n");
+            WebSocketService webSocketService = new WebSocketService();
+            System.out.println(token);
+            String command = webSocketService.initContainer(id,token.split(" ")[1],applicationContext);
+            this.sshAgent.printWriter.write(command);
+            //this.sshAgent.printWriter.write("docker run -it --name xxx ubuntu:16.04 bash"+"\r\n");
             this.sshAgent.printWriter.flush();
         } catch (IOException e) {
             e.printStackTrace();

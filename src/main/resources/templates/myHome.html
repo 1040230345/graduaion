@@ -264,6 +264,9 @@
                         localStorage.removeItem("token");
                         this.nickName = '未登录'
                         this.isLogin=false
+                        setTimeout(()=>{
+                            window.location.href="login";
+                        },1500)
                     }
 
                 })

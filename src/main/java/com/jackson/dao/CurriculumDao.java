@@ -19,4 +19,7 @@ public interface CurriculumDao {
 
     @Select("select * from curriculum t order by t.id limit #{startPosition},#{limit}")
     List<Curriculum> getCurriculumList(@Param("startPosition")Integer startPosition, @Param("limit")Integer limit);
+
+    @Select("select dockerPath from curriculum t where id =#{id}")
+    String getDockerPath(@Param("id") Integer id);
 }

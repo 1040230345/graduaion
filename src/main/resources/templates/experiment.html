@@ -17,6 +17,15 @@
     <script th:src="@{/editor-master/lib/jquery.flowchart.min.js}"></script>
     <script th:src="@{/editor-master/editormd.js}"></script>
 
+    <!-- import CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- import Vue before Element -->
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <!-- import JavaScript -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
 
 
     <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js" type="text/javascript"></script>
@@ -32,6 +41,17 @@
 
 <script th:src="@{/ansi_up.js}"></script>
 <script>
+    function getQueryVariable(variable)
+    {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i=0;i<vars.length;i++) {
+            var pair = vars[i].split("=");
+            if(pair[0] == variable){return pair[1];}
+        }
+        return(false);
+    }
+    getQueryVariable("id");
     //解析shell转义字符
     var ansi_up = new AnsiUp;
     //用于websocket连接
@@ -43,13 +63,17 @@
     } else {
         console.log("您的浏览器支持WebSocket");
         //实现化WebSocket对象，指定要连接的服务器地址与端口 ，建立连接
-        socket = new WebSocket("ws://localhost:8090/websocket");
+        var id = getQueryVariable("expId");
+        var token = localStorage.getItem("token");
+        socket = new WebSocket("ws://localhost:8090/websocket/"+id+"/"+token);
         //打开事件
-        socket.onopen = function() {
+        socket.onopen = function(msg) {
+            console.log("111111111111111"+msg)
             console.log("Socket 已打开");
         };
         //获得消息事件
         socket.onmessage = function(msg) {
+
 
             if (myhead) {
                 // msg.data = ansi_up.ansi_to_html(msg.data);
@@ -117,7 +141,7 @@
         };
         //发生了错误事件
         socket.onerror = function() {
-            alert("Socket发生了错误");
+            alert("连接失败！");
         }
         $(window).unload(function() {
             socket.close();
@@ -330,9 +354,9 @@
             },
             error: function(XMLHttpRequest, textStatus, errorThrown) {
                 //查看错误信息
-                alert(XMLHttpRequest.status);
-                alert(XMLHttpRequest.readyState);
-                alert(textStatus);
+                // alert(XMLHttpRequest.status);
+                // alert(XMLHttpRequest.readyState);
+                // alert(textStatus);
                 // console.log("???")
             }
         });

@@ -55,11 +55,12 @@ public class CurriculumController {
     @ApiOperation("获取课程示例文本")
     public Results getBookText(HttpServletRequest request){
 
-        String text  = (String)request.getSession().getAttribute("text");
-        PegDownProcessor pdp = new PegDownProcessor(Integer.MAX_VALUE);
-        String htmlContent = pdp.markdownToHtml(text);
-//        System.out.println(htmlContent);
-        return Results.success(htmlContent);
+//        String text  = (String)request.getSession().getAttribute("text");
+//        PegDownProcessor pdp = new PegDownProcessor(Integer.MAX_VALUE);
+//        String htmlContent = pdp.markdownToHtml(text);
+////        System.out.println(htmlContent);
+//        return Results.success(htmlContent);
+        return null;
     }
 
 }

@@ -21,7 +21,7 @@ public class JWTAuthenticationEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
-//        System.out.println("im coming");
+        System.out.println("im coming");
 //        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
         //如果访问需要授权的资源，跳转到登录页面
         try {
