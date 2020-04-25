@@ -19,4 +19,5 @@ public class SysRoleService {
     public SysRole getRole(Integer roleId) {
         return roleMapper.getRole(roleId);
     }
+
 }

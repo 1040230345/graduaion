@@ -11,4 +11,9 @@ public interface RoleMapper extends BaseMapper<SysRole> {
 
     @Select("select * from sys_role where id = #{roleId} ")
     SysRole getRole(@Param("roleId") Integer roleId);
+
+    @Select("select sr.name from sys_role sr " +
+            "join sys_role_user sru on sr.id = sru.role_id " +
+            "where sru.user_id = #{userId} ")
+    String getUserRole(@Param("userId") Integer userId);
 }

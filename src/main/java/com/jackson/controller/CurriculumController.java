@@ -4,16 +4,14 @@ package com.jackson.controller;
 import com.jackson.model.Curriculum;
 import com.jackson.result.Results;
 import com.jackson.service.CurriculumService;
+import com.jackson.threadLocal.RequestHolder;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.pegdown.PegDownProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -29,12 +27,22 @@ public class CurriculumController {
     private CurriculumService curriculumService;
 
     /**
-     * 分页获取课程列表
+     * 分页获取所以实验列表
      */
     @GetMapping("/getCurriculumList")
     @ApiOperation("分页获取课程列表")
     public Results<Curriculum> getCurriculumList(int startPosition ){
         return curriculumService.getCurriculum(startPosition);
+    }
+
+    /**
+     * 获取个人的实验
+     */
+    @GetMapping("/userCurriculumList")
+    @ApiOperation("获取个人实验列表")
+    public Results getUserCurriculumList(){
+        String username = (String) RequestHolder.getId();
+        return curriculumService.getUserCurriculum(username);
     }
 
     /**
@@ -61,6 +69,18 @@ public class CurriculumController {
 ////        System.out.println(htmlContent);
 //        return Results.success(htmlContent);
         return null;
+    }
+
+    /**
+     * 删除实验
+     */
+    @DeleteMapping("/Curriculum")
+    @ApiOperation("删除实验")
+    public Results delCurriculum(Integer currId){
+        if (curriculumService.removeById(currId)) {
+            return Results.success();
+        }
+        return Results.failure();
     }
 
 }

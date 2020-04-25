@@ -33,8 +33,8 @@ public class UserController {
     public Results getUser(HttpServletRequest request){
         //获取username
         String username = JwtTokenUtils.getUsernameByRequest(request);
-        //获取用户信息
-        return Results.success(userService.getUser(username));
+
+        return userService.getUserMsg(username);
 
     }
 
@@ -66,8 +66,7 @@ public class UserController {
     @ApiOperation("更改用户信息")
     public Results updateUserMsg(@RequestBody SysUser sysUser){
 
-        System.out.println(sysUser);
-        //获取用户id
+        //获取用户username
         String username = (String) RequestHolder.getId();
 
         sysUser.setPassword(new BCryptPasswordEncoder().encode(sysUser.getPassword()));
@@ -76,11 +75,10 @@ public class UserController {
             return Results.success();
         }
 
-//        if (userService.lambdaUpdate().set(SysUser::getHeadImageUrl,headerImage).eq(SysUser::getUsername,username).update()) {
-//            return Results.success();
-//        }
         return Results.failure();
     }
+
+
 
 
 }

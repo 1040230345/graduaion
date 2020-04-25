@@ -2,6 +2,7 @@ package com.jackson.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.jackson.dto.SysUserDto;
 import com.jackson.mapper.RoleMapper;
 import com.jackson.mapper.UserMapper;
 import com.jackson.mapper.UserRoleMapper;
@@ -12,6 +13,7 @@ import com.jackson.model.SysRoleUser;
 import com.jackson.model.SysUser;
 import com.jackson.result.Results;
 import com.jackson.security.utils.JwtTokenUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -37,6 +39,9 @@ public class UserService extends ServiceImpl<UserMapper, SysUser> {
     private UserRoleMapper userRoleMapper;
     @Autowired
     private RoleMapper roleMapper;
+
+    @Autowired
+    private UserService userService;
 
     /**
      * 获取用户
@@ -76,7 +81,7 @@ public class UserService extends ServiceImpl<UserMapper, SysUser> {
 
         //赋予权限
         SysRoleUser sysRoleUser = new SysRoleUser();
-        sysRoleUser.setRoleId(1);
+        sysRoleUser.setRoleId(userType);
         sysRoleUser.setUserId(sysUser.getId());
         sysRoleUser.setCreateTime(new Date().getTime());
         userRoleMapper.insert(sysRoleUser);
@@ -105,6 +110,22 @@ public class UserService extends ServiceImpl<UserMapper, SysUser> {
     public Results loginOut(String token) {
         stringRedisTemplate.opsForSet().add("BlackToken", token);//向指定key中存放set集合
         return Results.success("退出成功");
+    }
+
+    /**
+     * 获取用户信息
+     */
+    public Results getUserMsg(String username){
+
+        SysUser sysUser = userService.getOne(new QueryWrapper<SysUser>().eq("username",username));
+        //获取用户角色
+        String role = roleMapper.getUserRole(sysUser.getId());
+
+        SysUserDto sysUserDto = new SysUserDto();
+        BeanUtils.copyProperties(sysUser, sysUserDto);
+        sysUserDto.setRole(role);
+        //获取用户信息
+        return Results.success(sysUserDto);
     }
 
 }

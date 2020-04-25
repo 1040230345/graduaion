@@ -5,19 +5,11 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-/**
- * 课程模型
- * 2020年03月03日15:51:23
- */
+@TableName("docker_path")
 @Data
-@TableName("curriculum")
-public class Curriculum extends BaseEntity{
+public class DockerPath {
     @TableId(value = "id",type = IdType.AUTO)
     private Integer id;
-    private String title;
-    private String thumbnail;
-    private String synopsis;
-    private Integer userId;
-    private String dockerPath;
 
+    private String dockerPath;
 }

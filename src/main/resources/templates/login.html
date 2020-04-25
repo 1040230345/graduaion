@@ -42,8 +42,10 @@
 					<el-input class="myInput" placeholder="请输入密码" v-model="password" show-password ></el-input>
 					<div>
 						<div style="float: left">
-							<el-radio v-model="radio" label="1">学生</el-radio>
-							<el-radio v-model="radio" label="2">老师</el-radio>
+							<el-radio-group v-model="radio">
+							<el-radio  :label="1">学生</el-radio>
+							<el-radio  :label="2">老师</el-radio>
+							</el-radio-group>
 						</div>
 						<div style="float: right">
 							<el-button type="primary" v-on:click="register()":loading="btnstatus">{{registeredBtn}}</el-button>
@@ -74,7 +76,7 @@
 				username: '',
 				password: '',
 				activeName: 'first',
-				radio: '1',
+				radio: 1,
 				fits: [ 'contain'],
 				url: '/images/indexImages/docker.jpg',
 				btntest: '立即登录',
@@ -85,6 +87,7 @@
 		},
 		methods: {
 			register(){
+				console.log(this.radio)
 				if(this.username==''){
 					this.$message.error('账号不能为空');
 				}else if(this.password==''){

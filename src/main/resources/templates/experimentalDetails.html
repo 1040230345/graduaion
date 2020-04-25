@@ -35,7 +35,7 @@
         <el-submenu index="2" style="float: right" v-else>
             <template slot="title" ><i class="el-icon-loading" v-if="nickName==null"></i>{{nickName }}</template>
             <el-menu-item index="2-1"><a href="/getPage?pageName=myHome">个人中心</a> </el-menu-item>
-            <el-menu-item index="2-2">我的课程</el-menu-item>
+            <el-menu-item index="2-2" v-if="role=='ROLE_TEACHER'"><a href="/getPage?pageName=experimentalDetails">我的课程</a></el-menu-item>
             <el-menu-item index="2-3" v-on:click="outLogin()">退出登录</el-menu-item>
         </el-submenu>
         <el-menu-item style="float: right" index="3" v-if="isLogin==true">
@@ -45,7 +45,6 @@
                 <el-avatar :src="headImageUrl"></el-avatar>
             </div>
         </el-menu-item>
-        <!--				<el-menu-item index="4" style="float: right" disabled><a href="https://www.ele.me" target="_blank">{{nickName}}</a></el-menu-item>-->
     </el-menu>
     <div class="goods1 w">
     <template>
@@ -57,11 +56,16 @@
                             <!--						<img :src="item.thumbnail" class="hot" alt="">-->
                             <a href="#"><img :src="item.thumbnail" alt=""></a>
                             <p>{{item.title}}</p>
-                            <p class="level"><span>高级</span>  {{item.createTime}}</p>
-                            <el-button>默认按钮</el-button>
-                            <el-button style="float: right">默认按钮</el-button>
+                            <p class="level"><span>高级</span>  2020-09-08</p>
+<!--                            <div>-->
+<!--                                <el-button icon="el-icon-search" circle></el-button>-->
+                                <el-button @click='delCurr(item.id)' style="float: right;margin-right: 90px;" type="danger" icon="el-icon-delete" circle></el-button>
+<!--                            </div>-->
+
+<!--                            style="float: right"-->
                         </li>
                     </ul>
+                    <span v-if="items == [] ">您还没有发布过实验哦</span>
                 </div>
             </el-tab-pane>
             <el-tab-pane label="实验发布" name="second">
@@ -78,19 +82,20 @@
                                 <transition name="el-zoom-in-center">-->
                                     <el-upload v-show="show"
                                                class="transition-box" style="margin-right:0px"
-                                               action="#"
+                                               action="http://localhost:8090/common/upFile/image/2"
+                                               name="fileName"
                                                :limit="1"
+                                               :on-success="handleAvatarSuccess"
                                                :on-change="change"
                                                :on-remove="handleRemove"
-                                               list-type="picture-card"
-                                               :auto-upload="false">
+                                               list-type="picture-card">
+                                        <!--                                            :auto-upload="false">-->
                                         <i slot="default" class="el-icon-plus"></i>
-
                                     </el-upload>
+                                    <el-dialog :visible.sync="dialogVisible">
+                                        <img width="100%" :src="dialogImageUrl" alt="">
+                                    </el-dialog>
                                 </transition>
-                                <el-dialog :visible.sync="dialogVisible">
-                                    <img width="100%" :src="dialogImageUrl" alt="">
-                                </el-dialog>
 
                             </div>
                         </div>
@@ -104,24 +109,35 @@
                                     v-model="nickname">
                             </el-input>
                         </label>
-                    </div>
+                    </div><br/>
                     <div>实验内容
-                        <label style="display: block;margin-bottom: 6px;margin-top:6px;height: 50px">
-                            <el-col :span="11">
-                                <el-input
-                                        placeholder="请输入实验内容"
-                                        v-model="nickname">
-                                </el-input>
-                            </el-col>
-                            <el-col class="line" :span="2">-</el-col>
-                            <el-col :span="11">
-                                <el-input
-                                        v-model="nickname"
-                                        placeholder="latest">
-                                </el-input>
-                            </el-col>
-                        </label>
+<!--                        <label style="display: block;margin-bottom: 6px;margin-top:6px;height: 50px">-->
+<!--                            <el-col :span="11">-->
+<!--                                <el-input-->
+<!--                                        placeholder="请输入实验内容"-->
+<!--                                        v-model="nickname">-->
+<!--                                </el-input>-->
+<!--                            </el-col>-->
+<!--                            <el-col class="line" :span="2">-</el-col>-->
+<!--                            <el-col :span="11">-->
+<!--                                <el-input-->
+<!--                                        v-model="nickname"-->
+<!--                                        placeholder="latest">-->
+<!--                                </el-input>-->
+<!--                            </el-col>-->
+<!--                        </label>-->
+                        <template>
+                            <el-select v-model="value" placeholder="请选择">
+                                <el-option
+                                        v-for="item in options"
+                                        :key="item.dockerPath"
+                                        :label="item.dockerPath"
+                                        :value="item.dockerPath">
+                                </el-option>
+                            </el-select>
+                        </template>
                     </div>
+                    <br/>
                     <div>
                         <label style="display: block;margin-bottom: 6px">实验介绍
                             <el-input
@@ -133,13 +149,13 @@
                     </div>
                 </div>
                 <div style="position:absolute;top:280px;left:50%;transform: translateX(-50%)">
-                    <el-button type="primary">修改信息</el-button>
-                    <el-button type="info">重置</el-button>
+                    <el-button type="primary">添加实验</el-button>
+<!--                    <el-button type="info">重置</el-button>-->
                 </div>
 
             </div>
             </el-tab-pane>
-            <el-tab-pane label="我的留言" name="third">我的留言</el-tab-pane>
+<!--            <el-tab-pane label="我的留言" name="third">我的留言</el-tab-pane>-->
         </el-tabs>
     </template>
     </div>
@@ -149,67 +165,230 @@
 <script>
     new Vue({
         el: '#app',
-        data: function() {
+        data: function () {
             return {
                 dialogImageUrl: '',
                 dialogVisible: false,
                 disabled: false,
                 show: false,
                 dialogTableVisible: false,
-                status:'',
+                status: '',
                 checked: true,
-                activeName: 'first',
-                nickName:'未登录',
-                load:false,
-                headImageUrl:null,
-                isLogin:'',
-                items:[],
+                nickname: '',
+                password: 'root',
+                activeIndex: '1',
+                activeIndex2: '1',
+                activeName: 'second',
+                nickName: '未登录',
+                load: false,
+                headImageUrl: null,
+                isLogin: '',
+                items: [],
                 loading: true,
                 tabPosition: 'top',
                 fits: ['fill'],
-                url: 'http://img.taodabai.com/upload/13/f9/13f99f6ca1ff69fa6a468ce2b2ad09e5.jpg'
+                url: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg',
+                phone: "",
+                sex: "",
+                email: "",
+                role: '',
+                options: [],
+                value: '',
             }
         },
-        created(){
-
+        created() {
             console.log(localStorage.getItem("token"))
-            // this.getUser()
-            axios.get('curriculum/getCurriculumList',
+            this.getUser()
+            axios.get('curriculum/userCurriculumList',
                 {
-                    params: {
-                        startPosition:1
-                    }
-                },).then((res)=>{
+                    headers: {'Authorization': localStorage.getItem("token")}
+                }
+            ).then((res) => {
+                if (res.data.code == 2017) {
+                    this.$message({
+                        message: '您的登录已经过期，请重新登录',
+                        type: 'warning'
+                    });
+                    setTimeout(() => {
+                        window.location.href = "login";
+                    }, 1500)
+                }
                 console.log(res)
-                this.items=res.data.datas;
-                this.loading= false
+                this.items = res.data.data;
+                this.loading = false
             })
 
+            axios.get('docker/dockerPath',
+                {
+                    headers: {'Authorization': localStorage.getItem("token")}
+                }
+            ).then((res) => {
+                if (res.data.code == 2017) {
+                    this.$message({
+                        message: '您的登录已经过期，请重新登录',
+                        type: 'warning'
+                    });
+                    setTimeout(() => {
+                        window.location.href = "login";
+                    }, 1500)
+                }
+                console.log(res)
+                this.options = res.data.data;
+                // this.loading = false
+            })
         },
         methods: {
-            change(file,filelist){
-                if(filelist.length==1){
-                    document.querySelector('.el-upload--picture-card').style.display="none";
-                }else{
-                    document.querySelector('.el-upload--picture-card').style.display="inline-block";
+            change(file, filelist) {
+                if (filelist.length == 1) {
+                    document.querySelector('.el-upload--picture-card').style.display = "none";
+                } else {
+                    document.querySelector('.el-upload--picture-card').style.display = "inline-block";
                 }
+                //上传图片
                 console.log(filelist)
             },
-            handleRemove(file,filelist) {
+
+            handleRemove(file, filelist) {
                 filelist.pop();
-                setTimeout(()=>{
-                    this.change(file,filelist);
-                },800);
+                setTimeout(() => {
+                    this.change(file, filelist);
+                }, 800);
             },
+
             handlePictureCardPreview(file) {
                 this.dialogImageUrl = file.url;
                 this.dialogVisible = true;
             },
+
             handleDownload(file) {
                 console.log(file);
+            },
+
+            getUser() {
+                if (localStorage.getItem("token")) {
+                    this.token = localStorage.getItem("token");
+                    this.isLogin = true;
+                    this.nickName = null;
+                    axios.get('user/getUser',
+                        {
+                            headers: {'Authorization': localStorage.getItem("token")}
+                        }
+                    ).then((res) => {
+                        if (res.data.code == 2017) {
+                            this.$message({
+                                message: '您的登录已经过期，请重新登录',
+                                type: 'warning'
+                            });
+                            setTimeout(() => {
+                                window.location.href = "login";
+                            }, 1500)
+                        }
+                        if (res.data.code == 200) {
+                            this.role = res.data.data.role;
+                            if (res.data.data.nickname) {
+                                this.nickName = res.data.data.nickname;
+                            } else {
+                                this.nickName = "实验者"
+                            }
+                            if (res.data.data.headImageUrl) {
+                                this.headImageUrl = res.data.data.headImageUrl;
+                            } else {
+                                this.headImageUrl = 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
+                            }
+                        }
+
+                    })
+                }
+            },
+
+            outLogin() {
+                axios.post('user/loginOut', {},
+                    {
+                        headers: {'Authorization': localStorage.getItem("token")}
+                    }
+                ).then((res) => {
+                    console.log(res)
+                    if (res.data.code == 200) {
+                        this.$message({
+                            message: '退出成功啦',
+                            type: 'success'
+                        });
+
+                        localStorage.removeItem("token");
+                        this.nickName = '未登录'
+                        this.isLogin = false
+                        setTimeout(() => {
+                            window.location.href = "login";
+                        }, 1500)
+                    }
+
+                })
+            },
+
+            handleClick(tab, event) {
+                // console.log(tab, event);
+            },
+
+            //上传图片回显
+            handleAvatarSuccess(res,file) {
+                console.log(res)
+                if(res.code==200){
+                    this.$message({
+                        message: '恭喜你，上传成功',
+                        type: 'success'
+                    });
+                    this.url = "http://localhost:8090"+res.msg;
+                }else {
+                    this.$message.error('错了哦，请稍后再试试看');
+                }
+            },
+
+            //删除实验
+            delCurr(currId){
+                axios.delete('curriculum/Curriculum',{
+                    params:{
+                        currId : currId
+                    }
+                },
+                    {
+                        headers: {'Authorization': localStorage.getItem("token")}
+                    }
+                ).then((res) => {
+                    if (res.data.code == 2017) {
+                        this.$message({
+                            message: '您的登录已经过期，请重新登录',
+                            type: 'warning'
+                        });
+                        setTimeout(() => {
+                            window.location.href = "/getPage?pageName=experimentalDetails";
+                        }, 1500)
+                    }
+                    console.log(res)
+                    if(res.data.code == 200){
+                        this.$message({
+                            message: '删除成功',
+                            type: 'success'
+                        });
+                        setTimeout(() => {
+                            window.location.href = "login";
+                        }, 1500)
+                    }else {
+                        this.$message({
+                            message: '删除失败',
+                            type: 'warning'
+                        });
+                    }
+                })
+            },
+
+            //实验发布
+            addCurr(){
+
             }
+
+
         }
-        })
+    })
 </script>
 </body>
 </html>
