@@ -1,6 +1,5 @@
-package com.jackson.dao;
+package com.jackson.mapper;
 
-import com.jackson.exception.CustomizeErrorCode;
 import com.jackson.model.Curriculum;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -9,7 +8,7 @@ import org.apache.ibatis.annotations.Select;
 import java.util.List;
 
 @Mapper
-public interface CurriculumDao {
+public interface CurriculumMapper {
     /**
      * 获取课程列表总数
      * @return

@@ -1,8 +1,7 @@
 package com.jackson.service;
 
-import com.jackson.dao.UserRoleMapper;
+import com.jackson.mapper.UserRoleMapper;
 import com.jackson.model.SysRoleUser;
-import com.jackson.service.SysUserRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

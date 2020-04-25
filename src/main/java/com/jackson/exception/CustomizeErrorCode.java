@@ -30,8 +30,9 @@ public enum CustomizeErrorCode implements ICustomizeErrorCode {
     SYS_USER_NOFOUND(2016,"密码错误"),
     SYS_TOKEN_NOTIME(2017,"token已经过期"),
     SYS_TOKEN_ERROR(2018,"TOKEN错误，请勿非法请求"),
-    SYS_USER_IS_HAVA(2019,"用户名已经存在")
-
+    SYS_USER_IS_HAVA(2019,"用户名已经存在"),
+    UPFILE_NO_Find(10007,"获取不到上传文件"),
+    FILE_READ_ERROR(10008,"文件存储失败"),
     ;
 
     @Override

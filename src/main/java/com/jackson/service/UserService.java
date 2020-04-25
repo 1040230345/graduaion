@@ -1,9 +1,10 @@
 package com.jackson.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.jackson.dao.RoleMapper;
-import com.jackson.dao.UserMapper;
-import com.jackson.dao.UserRoleMapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.jackson.mapper.RoleMapper;
+import com.jackson.mapper.UserMapper;
+import com.jackson.mapper.UserRoleMapper;
 import com.jackson.exception.CustomizeErrorCode;
 import com.jackson.exception.CustomizeException;
 import com.jackson.model.SysRole;
@@ -27,7 +28,7 @@ import java.util.List;
 
 @Service
 @Transactional
-public class UserService {
+public class UserService extends ServiceImpl<UserMapper, SysUser> {
     @Autowired
     private UserMapper userMapper;
     @Autowired

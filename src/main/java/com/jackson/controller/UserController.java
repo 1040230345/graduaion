@@ -1,13 +1,17 @@
 package com.jackson.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.jackson.model.SysUser;
 import com.jackson.result.Results;
 import com.jackson.security.constants.SecurityConstants;
 import com.jackson.security.utils.JwtTokenUtils;
 import com.jackson.service.SysUserRoleService;
 import com.jackson.service.UserService;
+import com.jackson.threadLocal.RequestHolder;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,12 +60,26 @@ public class UserController {
     }
 
     /**
-     * 更换头像
+     * 更改用户信息
      */
-    @PutMapping("/userImage")
-    @ApiOperation("更改用户头像")
-    public Results updateUserImage(){
-        return null;
+    @PutMapping("/userMsg")
+    @ApiOperation("更改用户信息")
+    public Results updateUserMsg(@RequestBody SysUser sysUser){
+
+        System.out.println(sysUser);
+        //获取用户id
+        String username = (String) RequestHolder.getId();
+
+        sysUser.setPassword(new BCryptPasswordEncoder().encode(sysUser.getPassword()));
+
+        if (userService.update(sysUser,new QueryWrapper<SysUser>().eq("username",username))) {
+            return Results.success();
+        }
+
+//        if (userService.lambdaUpdate().set(SysUser::getHeadImageUrl,headerImage).eq(SysUser::getUsername,username).update()) {
+//            return Results.success();
+//        }
+        return Results.failure();
     }
 
 

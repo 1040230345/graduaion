@@ -7,6 +7,7 @@ import com.jackson.myUtils.RedisUtils;
 import com.jackson.result.Results;
 import com.jackson.security.constants.SecurityConstants;
 import com.jackson.security.utils.JwtTokenUtils;
+import com.jackson.threadLocal.RequestHolder;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
@@ -26,7 +27,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -85,6 +88,10 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
         String token = authorization.replace(SecurityConstants.TOKEN_PREFIX, "");
         try {
             String username = JwtTokenUtils.getUsernameByToken(token);
+
+            //把用户信息存在threadLocal中
+            RequestHolder.add(username);
+
             logger.info("checking username:" + username);
             // 通过 token 获取用户具有的角色
             List<SimpleGrantedAuthority> userRolesByToken = JwtTokenUtils.getUserRolesByToken(token);

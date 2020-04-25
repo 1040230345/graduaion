@@ -1,6 +1,6 @@
 package com.jackson.webSocket.service;
 
-import com.jackson.dao.CurriculumDao;
+import com.jackson.mapper.CurriculumMapper;
 import com.jackson.security.utils.JwtTokenUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -22,7 +22,7 @@ public class WebSocketService {
 
         StringRedisTemplate stringRedisTemplate = applicationContext.getBean(StringRedisTemplate.class);
 
-        CurriculumDao curriculumDao =  applicationContext.getBean(CurriculumDao.class);
+        CurriculumMapper curriculumMapper =  applicationContext.getBean(CurriculumMapper.class);
 
         //解析token
         String username = JwtTokenUtils.getUsernameByToken(token);
@@ -39,7 +39,7 @@ public class WebSocketService {
         }
 
         //获取docker镜像名称
-        String imageName = curriculumDao.getDockerPath(chapterId);
+        String imageName = curriculumMapper.getDockerPath(chapterId);
         //生成容器名称 时间搓 + 用户名
         String dockerName = new Date().getTime()+username;
 

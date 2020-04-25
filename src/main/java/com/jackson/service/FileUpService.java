@@ -1,21 +1,16 @@
 package com.jackson.service;
 
 import com.jackson.exception.CustomizeErrorCode;
-import com.jackson.exception.CustomizeException;
 import com.jackson.myUtils.FileUtils;
 import com.jackson.result.Results;
-import com.jackson.service.FileUpService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 上传事务层
@@ -25,37 +20,38 @@ import java.util.Map;
 @Transactional
 public class FileUpService  {
 
-    private static final String IMAGE_PATH="images";
+    private static final String IMAGE_URL_PATH="/images";
+
+    @Value("${image.ImagePath}")
+    private String imagePath;
 
     @Autowired
     private FileUtils fileUtils;
-
-    @Value("${image.ImagePath}")
-    private String ImagePath;
 
     /**
      *
      * @param file 文件
      * @return
      */
-    public Map upload(MultipartFile file, int type){
+    public Results upload(MultipartFile file, Integer type){
 
-        Map map = new HashMap();
+        if(type==null||type.equals("")){
+            log.warn("up file is error type is null ");
+            return Results.failure(CustomizeErrorCode.UPFILE_NO_Find);
+        }
+
         if (file.isEmpty()) {
-
-            map.put("success", 0);
-            map.put("message", "获取不到上传文件");
             // 设置错误状态码
-            return map;
+            return Results.failure();
         }
         // 拿到文件名
         String fileName = file.getOriginalFilename();
 
-        //判断是哪种类型的图片
-        String imagePath = getImagePath(type);
+        //获取图片类型地址
+        String imageTypePath = getImagePath(type);
 
         //指定文件夹
-        String path = ImagePath+imagePath;
+        String path = imagePath+imageTypePath;
 
         // 生成新的文件名
         String newName = fileUtils.getFileName(fileName);
@@ -63,37 +59,23 @@ public class FileUpService  {
         // 新的路径
         String filePath = path+"/"+newName;
 
-        File dest = new File(filePath);
-        //判断文件父目录是否存在
+        File dest = new File(new File(filePath).getAbsolutePath());
         if(!dest.getParentFile().exists()){
-            dest.getParentFile().mkdir();
+            dest.getParentFile().mkdirs();
         }
         try {
-            //保存文件
             file.transferTo(dest);
-            map.put("success", 1);
-            map.put("message", "上传成功");
-            map.put("url", "http://localhost:8090"+"/"+IMAGE_PATH+imagePath+"/"+newName);
-            //返回文件名
-//            return Results.success("/"+IMAGE_PATH+"/"+imagePath+"/"+newName);
-            return map;
+            return Results.success(IMAGE_URL_PATH+imageTypePath+"/"+newName);
         } catch (IllegalStateException e) {
-            // TODO Auto-generated catch block
-            map.put("success", 0);
-            map.put("message", "失败");
-            log.error("环境问题"+e);
-//            throw new CustomizeException(CustomizeErrorCode.SYS_ERROR);
-            return map;
+            log.error("upload file failed，",e);
+            return Results.failure();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            map.put("success", 0);
-            map.put("message", "失败");
-            log.error("读写文件出错"+e);
-//            throw new CustomizeException(CustomizeErrorCode.SYS_ERROR);
-            return map;
+            log.error("Read file error,",e);
+            return Results.failure(CustomizeErrorCode.FILE_READ_ERROR);
         }
 
     }
+
 
     private String getImagePath(int type) {
         switch (type) {

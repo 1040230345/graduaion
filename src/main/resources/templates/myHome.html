@@ -55,24 +55,28 @@
                                         style="width: 200px; height: 200px;border-radius: 50%"
                                         :src="url"
                                         :fit="fit"></el-image>
-                                <el-link @click="show = !show" type="primary" :underline="false" style="display: block;margin-top: 6px;text-align: center;">更换头像</el-link>
+                                <el-link @click="show = !show" type="primary" :underline="false" style="display: block;
+                                margin-top: 6px;text-align: center;">更换头像</el-link>
 
                                 <div style="display: flex;  height: 200px;display: block;margin-top: 6px;text-align: center;">
-                                    <transition name="el-zoom-in-center">-->
+                                    <transition name="el-zoom-in-center">
                                     <el-upload v-show="show"
                                             class="transition-box" style="margin-right:0px"
-                                            action="#"
+                                            action="http://localhost:8090/common/upFile/image/1"
+                                               name="fileName"
                                             :limit="1"
+                                               :on-success="handleAvatarSuccess"
                                                :on-change="change"
                                                :on-remove="handleRemove"
-                                            list-type="picture-card"
-                                            :auto-upload="false">
+                                            list-type="picture-card">
+<!--                                            :auto-upload="false">-->
                                         <i slot="default" class="el-icon-plus"></i>
                                     </el-upload>
+                                        <el-dialog :visible.sync="dialogVisible">
+                                            <img width="100%" :src="dialogImageUrl" alt="">
+                                        </el-dialog>
                                     </transition>
-                                    <el-dialog :visible.sync="dialogVisible">
-                                        <img width="100%" :src="dialogImageUrl" alt="">
-                                    </el-dialog>
+
                                 </div>
                             </div>
                         </div>
@@ -81,7 +85,7 @@
                                 <label style="display: block;margin-bottom: 6px">昵称:</label>
                                 <el-input
                                         :placeholder="nickName"
-                                        v-model="nickname">
+                                        v-model="nickName">
                                 </el-input>
                             </div>
                             <div>
@@ -119,16 +123,16 @@
                             </div>
                         </div>
                         <div style="position:absolute;top:237px;left:50%;transform: translateX(-50%)">
-                            <el-button type="primary">修改信息</el-button>
+                            <el-button type="primary" @click="updateUserMsg">修改信息</el-button>
                             <el-button type="info">重置</el-button>
                         </div>
                         </div>
 
 
                 </el-tab-pane>
-                <el-tab-pane label="我的课程">我的课程</el-tab-pane>
-                <el-tab-pane label="其他信息"></el-tab-pane>
-                <el-tab-pane label="我的特长">定时任务补偿</el-tab-pane>
+<!--                <el-tab-pane label="我的课程">我的课程</el-tab-pane>-->
+<!--                <el-tab-pane label="其他信息"></el-tab-pane>-->
+<!--                <el-tab-pane label="我的特长">定时任务补偿</el-tab-pane>-->
             </el-tabs>
         </template>
         </div>
@@ -176,24 +180,28 @@
                 url: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg',
                 phone: "",
                 sex: "",
-                email: ""
+                email: "",
             }
         },
         created(){
             console.log(localStorage.getItem("token"))
             this.getUser()
-
-        },
-        mounted(){
-
         },
         methods:{
+            // handleRemove(file, fileList) {
+            //     console.log(file, fileList);
+            // },
+            // handlePictureCardPreview(file) {
+            //     this.dialogImageUrl = file.url;
+            //     this.dialogVisible = true;
+            // },
             change(file,filelist){
                if(filelist.length==1){
                    document.querySelector('.el-upload--picture-card').style.display="none";
                }else{
                    document.querySelector('.el-upload--picture-card').style.display="inline-block";
                }
+               //上传图片
               console.log(filelist)
             },
             handleRemove(file,filelist) {
@@ -219,6 +227,15 @@
                             headers: {'Authorization':localStorage.getItem("token") }
                         }
                     ).then((res)=>{
+                        if (res.data.code == 2017){
+                            this.$message({
+                                message: '您的登录已经过期，请重新登录',
+                                type: 'warning'
+                            });
+                            setTimeout(()=>{
+                                window.location.href="login";
+                            },1500)
+                        }
                         if(res.data.code==200){
                             if(res.data.data.nickname){
                                 this.nickName = res.data.data.nickname;
@@ -227,8 +244,10 @@
                             }
                             if(res.data.data.headImageUrl){
                                 this.headImageUrl = res.data.data.headImageUrl;
+                                this.url = res.data.data.headImageUrl;
                             }else {
                                 this.headImageUrl = 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
+                                this.url= 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
                             }
                             this.phone = res.data.data.phone;
                             this.password = res.data.data.password;
@@ -271,6 +290,67 @@
 
                 })
             },
+
+            //上传图片回显
+            handleAvatarSuccess(res, file) {
+                // this.imageUrl = URL.createObjectURL(file.raw);
+                // //重点  得到上传图片的名字
+                // this.ruleForm.userHeaderPicture = res.data
+                console.log(res)
+                if(res.code==200){
+                    this.$message({
+                        message: '恭喜你，上传成功',
+                        type: 'success'
+                    });
+                    this.url = "http://localhost:8090"+res.msg;
+                }else {
+                    this.$message.error('错了哦，请稍后再试试看');
+                }
+            },
+
+            //更新用户信息
+            updateUserMsg(){
+
+                if(this.sex=="男"){
+                    var userSex = 1;
+                }else {
+                    var userSex = 0;
+                }
+                // console.log(localStorage.getItem("token"))
+                if(localStorage.getItem("token")){
+                    axios.put('user/userMsg',{
+                        headImageUrl:this.url,
+                        phone:this.phone,
+                        nickname:this.nickName,
+                        password:this.password,
+                        email :this.email,
+                        sex: userSex,
+                    },
+                        {
+                            headers: {'Authorization':localStorage.getItem("token") }
+                        }
+                    ).then((res)=>{
+                        if (res.data.code == 2017){
+                            this.$message({
+                                message: '您的登录已经过期，请重新登录',
+                                type: 'warning'
+                            });
+                            setTimeout(()=>{
+                                window.location.href="login";
+                            },1500)
+                        }
+                        if(res.data.code==200){
+                            this.$message({
+                                message: '恭喜你，修改成功',
+                                type: 'success'
+                            });
+                        }else {
+                            this.$message.error('错了哦，请稍后再试试看');
+                        }
+
+                    })
+                }
+            }
         },
     })
 </script>

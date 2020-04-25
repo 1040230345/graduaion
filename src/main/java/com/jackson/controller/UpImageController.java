@@ -1,6 +1,7 @@
 package com.jackson.controller;
 
 
+import com.jackson.result.Results;
 import com.jackson.service.FileUpService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -22,7 +23,7 @@ public class UpImageController {
      * 上传文件
      */
     @PostMapping("/upImage")
-    public Map upImage(@RequestParam(value = "editormd-image-file") MultipartFile userImage, @RequestParam(defaultValue = "2") Integer type){
+    public Results upImage(@RequestParam(value = "editormd-image-file") MultipartFile userImage, @RequestParam(defaultValue = "2") Integer type){
         return fileUpService.upload(userImage,type);
     }
 

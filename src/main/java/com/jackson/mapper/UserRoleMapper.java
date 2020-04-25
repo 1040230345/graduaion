@@ -1,4 +1,4 @@
-package com.jackson.dao;
+package com.jackson.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.jackson.model.SysRoleUser;
