@@ -14,10 +14,15 @@ import lombok.Data;
 public class Curriculum extends BaseEntity{
     @TableId(value = "id",type = IdType.AUTO)
     private Integer id;
+
     private String title;
+
     private String thumbnail;
+
     private String synopsis;
+
     private Integer userId;
+
     private String dockerPath;
 
 }

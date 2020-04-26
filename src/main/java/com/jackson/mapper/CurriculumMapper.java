@@ -20,7 +20,7 @@ public interface CurriculumMapper extends BaseMapper<Curriculum> {
     @Select("select * from curriculum t order by t.id limit #{startPosition},#{limit}")
     List<Curriculum> getCurriculumList(@Param("startPosition")Integer startPosition, @Param("limit")Integer limit);
 
-    @Select("select dockerPath from curriculum t where id =#{id}")
+    @Select("select docker_path from curriculum t where id =#{id}")
     String getDockerPath(@Param("id") Integer id);
 
     @Select("select * from curriculum t where user_id = #{userId}")

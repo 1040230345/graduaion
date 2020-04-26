@@ -1,10 +1,14 @@
 package com.jackson.controller;
 
 
+import com.jackson.mapper.UserMapper;
 import com.jackson.model.Curriculum;
+import com.jackson.model.SysUser;
 import com.jackson.result.Results;
 import com.jackson.service.CurriculumService;
+import com.jackson.service.UserService;
 import com.jackson.threadLocal.RequestHolder;
+import com.sun.org.apache.regexp.internal.RE;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.pegdown.PegDownProcessor;
@@ -14,6 +18,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 
 /**
  * 课程控制器
@@ -25,6 +30,8 @@ import javax.servlet.http.HttpServletRequest;
 public class CurriculumController {
     @Autowired
     private CurriculumService curriculumService;
+    @Autowired
+    private UserService userService;
 
     /**
      * 分页获取所以实验列表
@@ -78,6 +85,25 @@ public class CurriculumController {
     @ApiOperation("删除实验")
     public Results delCurriculum(Integer currId){
         if (curriculumService.removeById(currId)) {
+            return Results.success();
+        }
+        return Results.failure();
+    }
+
+    /**
+     * 添加实验
+     */
+    @PostMapping("/Curriculum")
+    @ApiOperation("添加实验")
+    public Results addCurriculum( Curriculum curriculum){
+        String username = (String) RequestHolder.getId();
+        //获取用户id
+        SysUser sysUser = userService.getUser(username);
+
+        curriculum.setUserId(sysUser.getId());
+        curriculum.setCreateTime(new Date().getTime());
+
+        if (curriculumService.save(curriculum)) {
             return Results.success();
         }
         return Results.failure();

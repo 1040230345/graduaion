@@ -59,7 +59,10 @@
                             <p class="level"><span>高级</span>  2020-09-08</p>
 <!--                            <div>-->
 <!--                                <el-button icon="el-icon-search" circle></el-button>-->
-                                <el-button @click='delCurr(item.id)' style="float: right;margin-right: 90px;" type="danger" icon="el-icon-delete" circle></el-button>
+                            <div style="display: flex;justify-content: center;width: 100%;">
+                                <el-button @click='open(item.id)' style="" type="danger" icon="el-icon-delete">删除</el-button>
+
+                            </div>
 <!--                            </div>-->
 
 <!--                            style="float: right"-->
@@ -106,26 +109,11 @@
                             <el-input
                                     style="margin-top: 6px"
                                     placeholder="请输入实验标题"
-                                    v-model="nickname">
+                                    v-model="title">
                             </el-input>
                         </label>
                     </div><br/>
                     <div>实验内容
-<!--                        <label style="display: block;margin-bottom: 6px;margin-top:6px;height: 50px">-->
-<!--                            <el-col :span="11">-->
-<!--                                <el-input-->
-<!--                                        placeholder="请输入实验内容"-->
-<!--                                        v-model="nickname">-->
-<!--                                </el-input>-->
-<!--                            </el-col>-->
-<!--                            <el-col class="line" :span="2">-</el-col>-->
-<!--                            <el-col :span="11">-->
-<!--                                <el-input-->
-<!--                                        v-model="nickname"-->
-<!--                                        placeholder="latest">-->
-<!--                                </el-input>-->
-<!--                            </el-col>-->
-<!--                        </label>-->
                         <template>
                             <el-select v-model="value" placeholder="请选择">
                                 <el-option
@@ -143,13 +131,13 @@
                             <el-input
                                     style="margin-top: 6px"
                                     placeholder="请输入实验介绍"
-                                    v-model="nickname">
+                                    v-model="synopsis">
                             </el-input>
                         </label>
                     </div>
                 </div>
                 <div style="position:absolute;top:280px;left:50%;transform: translateX(-50%)">
-                    <el-button type="primary">添加实验</el-button>
+                    <el-button @click='addCurr()' type="primary">添加实验</el-button>
 <!--                    <el-button type="info">重置</el-button>-->
                 </div>
 
@@ -194,6 +182,8 @@
                 role: '',
                 options: [],
                 value: '',
+                synopsis: '',
+                title:''
             }
         },
         created() {
@@ -360,7 +350,7 @@
                             type: 'warning'
                         });
                         setTimeout(() => {
-                            window.location.href = "/getPage?pageName=experimentalDetails";
+                            window.location.href = "login";
                         }, 1500)
                     }
                     console.log(res)
@@ -370,7 +360,7 @@
                             type: 'success'
                         });
                         setTimeout(() => {
-                            window.location.href = "login";
+                            window.location.href = "/getPage?pageName=experimentalDetails";
                         }, 1500)
                     }else {
                         this.$message({
@@ -383,7 +373,64 @@
 
             //实验发布
             addCurr(){
+                if (localStorage.getItem("token")) {
+                    axios.post('curriculum/Curriculum',null,
+                        {
+                            headers: {'Authorization': localStorage.getItem("token")},
+                            params: {
+                                title: this.title,
+                                    synopsis: this.synopsis,
+                                    dockerPath: this.value,
+                                    thumbnail:this.url
+                            }
+                        }
+                    ).then((res) => {
+                        if (res.data.code == 2017) {
+                            this.$message({
+                                message: '您的登录已经过期，请重新登录',
+                                type: 'warning'
+                            });
+                            setTimeout(() => {
+                                window.location.href = "login";
+                            }, 1500)
+                        }
+                        if (res.data.code == 200) {
+                            this.$notify({
+                                title: '成功',
+                                message: '发布成功啦',
+                                type: 'success'
+                            });
+                            setTimeout(() => {
+                                window.location.href = "/getPage?pageName=experimentalDetails";
+                            }, 1500)
+                        }else{
+                            this.$notify.error({
+                                title: '错误',
+                                message: '哎哟失败啦，重新来过吧'
+                            });
+                        }
 
+                    })
+                }
+            },
+
+            open(currId) {
+                this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.delCurr(currId)
+                    this.$message({
+                        type: 'success',
+                        message: '删除成功!'
+                    });
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
             }
 
 
