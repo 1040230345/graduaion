@@ -1,12 +1,18 @@
 package com.jackson.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.jackson.model.Chapter;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 @Mapper
-public interface ChapterMapper {
-    //查询docker镜像名称
-    @Select("select docker_path from chapter where id = #{chapterId}")
-    String getDockerPathById(@Param("chapterId") Integer chapterId);
+public interface ChapterMapper extends BaseMapper<Chapter> {
+
+    /**
+     * 获取实验内容
+     */
+    @Select("select text from chapter where id = #{chapterId} ")
+    String getText(@Param("chapterId") Integer chapterId);
+
 }

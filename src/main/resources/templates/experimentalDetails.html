@@ -15,6 +15,8 @@
     <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+
 </head>
 <body>
 <style>
@@ -24,7 +26,30 @@
     .line {
         text-align: center;
     }
+
+    .el-collapse-item__header {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        height: 48px;
+        line-height: 48px;
+        /* background-color: #FFF; */
+        color: #303133;
+        cursor: pointer;
+        border-bottom: 1px solid #EBEEF5;
+        font-size: 13px;
+        font-weight: 500;
+        -webkit-transition: border-bottom-color .3s;
+        transition: border-bottom-color .3s;
+        outline: 0;
+    }
 </style>
+<script>
+
+</script>
 <div id="app" v-cloak>
     <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
         <el-menu-item index="1">
@@ -54,7 +79,7 @@
                     <ul>
                         <li v-for="item in items" >
                             <!--						<img :src="item.thumbnail" class="hot" alt="">-->
-                            <a href="#"><img :src="item.thumbnail" alt=""></a>
+                            <a :href="'/courseEditor?id='+item.id"><img :src="item.thumbnail" alt=""></a>
                             <p>{{item.title}}</p>
                             <p class="level"><span>高级</span>  2020-09-08</p>
 <!--                            <div>-->
@@ -183,7 +208,8 @@
                 options: [],
                 value: '',
                 synopsis: '',
-                title:''
+                title:'',
+
             }
         },
         created() {
@@ -226,6 +252,8 @@
                 this.options = res.data.data;
                 // this.loading = false
             })
+
+
         },
         methods: {
             change(file, filelist) {
@@ -436,6 +464,10 @@
 
         }
     })
+</script>
+
+<script>
+
 </script>
 </body>
 </html>

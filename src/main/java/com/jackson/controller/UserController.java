@@ -78,6 +78,14 @@ public class UserController {
         return Results.failure();
     }
 
+    /**
+     * 获取做过的实验
+     */
+    @GetMapping("/userCurr")
+    @ApiOperation("获取个人做过的实验")
+    public Results getUserCurr(){
+        return null;
+    }
 
 
 

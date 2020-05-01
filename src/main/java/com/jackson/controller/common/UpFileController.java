@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/common/upFile")
@@ -25,5 +26,14 @@ public class UpFileController {
     public Results upSchoolImage(@RequestParam("fileName") MultipartFile image,
                                  @PathVariable("imageType") Integer imageType){
         return fileUpService.upload(image,imageType);
+    }
+
+    /**
+     * 上传文件
+     */
+    @PostMapping("/upImage")
+    public Map upImage(@RequestParam(value = "editormd-image-file") MultipartFile userImage, @RequestParam(defaultValue = "3") Integer type){
+
+        return fileUpService.upload1(userImage,type);
     }
 }

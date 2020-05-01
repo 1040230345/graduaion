@@ -46,7 +46,7 @@ public class WebSocketService {
         String command = "docker run -it --name "+dockerName+" "+imageName+" bash"+"\r\n";
 
         //存在redis中
-        stringRedisTemplate.opsForValue().set(username+"=="+chapterId, dockerName,60*60*60+10, TimeUnit.SECONDS);//向redis里存入数据和设置缓存时间
+        stringRedisTemplate.opsForValue().set(username+"=="+chapterId, dockerName,60*60*60*7, TimeUnit.SECONDS);//向redis里存入数据和设置缓存时间
 
         return command;
     }

@@ -21,17 +21,22 @@
     <!-- 引入样式 -->
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
 </head>
-
+<script>
+    function getQueryVariable(variable)
+    {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i=0;i<vars.length;i++) {
+            var pair = vars[i].split("=");
+            if(pair[0] == variable){return pair[1];}
+        }
+        return(false);
+    }
+</script>
 <body>
 <div id="app">
     <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
         <el-menu-item index="1">首页</el-menu-item>
-        <el-menu-item index="2">用户名</el-menu-item>
-        <el-submenu index="3">
-            <template slot="title">个人中心</template>
-            <el-menu-item index="3-1">我的信息</el-menu-item>
-            <el-menu-item index="3-2">我的课程</el-menu-item>
-            <el-menu-item index="3-3">我的学习</el-menu-item>
             <!-- <el-submenu index="3-4">
                 <template slot="title">选项4</template>
                 <el-menu-item index="3-4-1">选项1</el-menu-item>
@@ -45,7 +50,10 @@
         <textarea id="text" style="display:none;"></textarea>
     </div>
     <div>
+        <el-input v-model="input" placeholder="请输入标题"></el-input><br>
+        <el-button type="primary" class="mybtn" @click="returnHome()" >返回</el-button>
         <el-button type="primary" class="mybtn" @click="btnSave" :loading="btnstatus">{{btntext}}</el-button>
+
     </div>
 </div>
 </body>
@@ -60,7 +68,9 @@
                 btnstatus: false,
                 btntext: '提交',
                 activeIndex: '1',
-                activeIndex2: '1'
+                activeIndex2: '1',
+                input:'',
+                id:''
             }
         },
         mounted() {
@@ -74,17 +84,23 @@
                 tocm: true,
                 imageUpload: true, //开启本地图片上传
                 imageFormats: ["jpg", "jpeg", "gif", "png"], //设置上传图片的格式
-                imageUploadURL: "image/upImage" //上传图片请求路径
+                imageUploadURL: "common/upFile/upImage" //上传图片请求路径
             });
+            this.id = getQueryVariable("id");
         },
         methods: {
             btnSave() {
                 var that = this;
                 that.btnstatus = true;
                 that.btntext = '提交中';
+                this.id = getQueryVariable("id");
+
+                console.log(this.id)
                 var text = $("#text").text();
                 let data = {
-                    bookText: text
+                    text: text,
+                    title:this.input,
+                    curriculumId:this.id,
                 }
                 $.ajax({
                     url: "curriculum/upBookText",
@@ -108,6 +124,9 @@
                         that.btntext = '提交';
                     }
                 });
+            },
+            returnHome(){
+                window.location.href = "/courseEditor?id="+this.id;
             }
         }
     })

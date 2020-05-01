@@ -24,7 +24,28 @@
     .line {
         text-align: center;
     }
+
+    .el-collapse-item__header {
+        background-color:  transparent;
+    }
+    .el-collapse-item__wrap {
+        background-color:  transparent;
+    }
+
 </style>
+<script>
+    function getQueryVariable(variable)
+    {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i=0;i<vars.length;i++) {
+            var pair = vars[i].split("=");
+            if(pair[0] == variable){return pair[1];}
+        }
+        return(false);
+    }
+
+</script>
 <div id ="app" v-cloak>
         <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
             <el-menu-item index="1">
@@ -48,35 +69,20 @@
             <!--				<el-menu-item index="4" style="float: right" disabled><a href="https://www.ele.me" target="_blank">{{nickName}}</a></el-menu-item>-->
         </el-menu>
 <!--        <div class="goods1 w">-->
-    <div class="goods1 w">
-        <template>
-            <el-tabs v-model="activeName" >
-                <el-tab-pane :label="title" name="first">
-                    <el-collapse v-model="activeNames">
-                        <el-collapse-item title="      一致性 Consistency" name="1">
-                            <div>&nbsp;&nbsp;与现实生活一致：与现实生活的流程、逻辑保持一致，遵循用户习惯的语言和概念；</div>
-                            <div>&nbsp;&nbsp;在界面中一致：所有的元素和结构需保持一致，比如：设计样式、图标和文本、元素的位置等。</div>
-                        </el-collapse-item>
-                        <el-collapse-item title="反馈 Feedback" name="2">
-                            <div>控制反馈：通过界面样式和交互动效让用户可以清晰的感知自己的操作；</div>
-                            <div>页面反馈：操作后，通过页面元素的变化清晰地展现当前状态。</div>
-                        </el-collapse-item>
-                        <el-collapse-item title="效率 Efficiency" name="3">
-                            <div>简化流程：设计简洁直观的操作流程；</div>
-                            <div>清晰明确：语言表达清晰且表意明确，让用户快速理解进而作出决策；</div>
-                            <div>帮助用户识别：界面简单直白，让用户快速识别而非回忆，减少用户记忆负担。</div>
-                        </el-collapse-item>
-                        <el-collapse-item title="可控 Controllability" name="4">
-                            <div>用户决策：根据场景可给予用户操作建议或安全提示，但不能代替用户进行决策；</div>
-                            <div>结果可控：用户可以自由的进行操作，包括撤销、回退和终止当前操作等。</div>
+    <div class="goods1 w" style="background-color: transparent">
+        <template >
+            <el-tabs v-model="activeName"  >
+                <el-tab-pane :label="title" name="first" >
+                    <el-collapse v-model="activeNames" accordion>
+                        <el-collapse-item :title="item.title"
+                            v-for="item in items" :key="item.id">
+                            <div v-html="item.text"></div>
+<!--                            <div>&nbsp;&nbsp;在界面中一致：所有的元素和结构需保持一致，比如：设计样式、图标和文本、元素的位置等。</div>-->
                         </el-collapse-item>
                     </el-collapse>
                     <br/>
-                    <el-button type="primary">添加课程</el-button>
+                    <el-button v-on:click="addClass(id)" type="primary">添加课程</el-button>
                 </el-tab-pane>
-<!--                <el-tab-pane label="配置管理" name="second">配置管理</el-tab-pane>-->
-<!--                <el-tab-pane label="角色管理" name="third">角色管理</el-tab-pane>-->
-<!--                <el-tab-pane label="定时任务补偿" name="fourth">定时任务补偿</el-tab-pane>-->
             </el-tabs>
         </template>
     </div>
@@ -86,6 +92,7 @@
         el: '#app',
         data: function() {
             return {
+                activeIndex:null,
                 dialogImageUrl: '',
                 dialogVisible: false,
                 disabled: false,
@@ -98,19 +105,22 @@
                 load:false,
                 headImageUrl:null,
                 isLogin:'',
-                items:[],
                 loading: true,
                 tabPosition: 'top',
                 fits: ['fill'],
                 url: 'http://img.taodabai.com/upload/13/f9/13f99f6ca1ff69fa6a468ce2b2ad09e5.jpg',
-                activeNames: ['1'],
-                title: "测试"
+                activeNames: '1',
+                title: "课程",
+                id :'',
+                items:[],
             }
         },
         created(){
             console.log(localStorage.getItem("token"))
             this.getUser()
-
+            this.id = getQueryVariable("id");
+            console.log(this.id)
+            this.getCurrClass();
         },
         mounted(){
 
@@ -172,8 +182,44 @@
 
                 })
             },
+            addClass(id){
+                window.location.href = "/myMarkDown?id="+id;
+            },
+            getCurrClass(){
+                if(localStorage.getItem("token")){
+                    axios.get('curriculum/getBookText',
+                        {
+                            headers: {'Authorization':localStorage.getItem("token") },
+                            params:{
+                                currId:this.id
+                            }
+                        }
+                    ).then((res)=>{
+                        // console.log(res)
+                        if (res.data.code == 2017){
+                            this.$message({
+                                message: '您的登录已经过期，请重新登录',
+                                type: 'warning'
+                            });
+                            setTimeout(()=>{
+                                window.location.href="login";
+                            },1500)
+                        }
+                        if(res.data.code==200){
+                            this.items = res.data.data;
+                        }else {
+                            this.$message({
+                                message: '失败了，请稍等再试试看',
+                                type: 'warning'
+                            });
+                        }
+
+                    })
+                }
+            }
         },
     })
 </script>
+
 </body>
 </html>
