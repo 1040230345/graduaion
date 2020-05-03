@@ -84,9 +84,20 @@ public class UserController {
     @GetMapping("/userCurr")
     @ApiOperation("获取个人做过的实验")
     public Results getUserCurr(){
-        return null;
+        //获取用户username
+        String username = (String) RequestHolder.getId();
+
+        return userService.getUserCurr(username);
     }
 
+    /**
+     * 删除做过的实验
+     */
+    @DeleteMapping("/userCurr")
+    @ApiOperation("删除做过的实验")
+    public Results delUserCurr(Integer userCurrId){
+        return userService.delUserCurr(userCurrId);
+    }
 
 
 }

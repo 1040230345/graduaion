@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jackson.dto.SysUserDto;
 import com.jackson.mapper.RoleMapper;
+import com.jackson.mapper.UserCurrMapper;
 import com.jackson.mapper.UserMapper;
 import com.jackson.mapper.UserRoleMapper;
 import com.jackson.exception.CustomizeErrorCode;
@@ -13,13 +14,13 @@ import com.jackson.model.SysRoleUser;
 import com.jackson.model.SysUser;
 import com.jackson.result.Results;
 import com.jackson.security.utils.JwtTokenUtils;
+import com.jackson.threadLocal.RequestHolder;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -42,6 +43,9 @@ public class UserService extends ServiceImpl<UserMapper, SysUser> {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserCurrMapper userCurrMapper;
 
     /**
      * 获取用户
@@ -126,6 +130,31 @@ public class UserService extends ServiceImpl<UserMapper, SysUser> {
         sysUserDto.setRole(role);
         //获取用户信息
         return Results.success(sysUserDto);
+    }
+
+    /**
+     * 获取自己试验过得课程
+     */
+    public Results getUserCurr(String username){
+
+        return  Results.success(userCurrMapper.getUserCurr(username));
+    }
+
+    /**
+     * 删除自己做过的实验
+     */
+    public Results delUserCurr(Integer userCurrId){
+        //获取用户username
+        String username = (String) RequestHolder.getId();
+
+        Integer delNum = userCurrMapper.delUserCurr(username,userCurrId);
+
+        if(delNum>0){
+            //根据key删除缓存
+            stringRedisTemplate.delete(username+"=="+userCurrId);
+            return Results.success();
+        }
+        return Results.failure();
     }
 
 }

@@ -1,6 +1,10 @@
 package com.jackson.webSocket.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.jackson.mapper.CurriculumMapper;
+import com.jackson.mapper.UserCurrMapper;
+import com.jackson.model.UserCurr;
 import com.jackson.security.utils.JwtTokenUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -23,6 +27,8 @@ public class WebSocketService {
         StringRedisTemplate stringRedisTemplate = applicationContext.getBean(StringRedisTemplate.class);
 
         CurriculumMapper curriculumMapper =  applicationContext.getBean(CurriculumMapper.class);
+
+        UserCurrMapper userCurrMapper = applicationContext.getBean(UserCurrMapper.class);
 
         //解析token
         String username = JwtTokenUtils.getUsernameByToken(token);
@@ -47,6 +53,21 @@ public class WebSocketService {
 
         //存在redis中
         stringRedisTemplate.opsForValue().set(username+"=="+chapterId, dockerName,60*60*60*7, TimeUnit.SECONDS);//向redis里存入数据和设置缓存时间
+
+        //持久化
+        UserCurr userCurr = userCurrMapper.selectOne(new QueryWrapper<UserCurr>().eq("curr_id",chapterId).eq("user_name",username));
+
+        if(userCurr==null){
+            userCurr=new UserCurr();
+            userCurr.setCurrId(chapterId);
+            userCurr.setCurrName(dockerName);
+            userCurr.setUserName(username);
+            userCurr.setCreateTime(new Date().getTime());
+
+            userCurrMapper.insert(userCurr);
+        }else {
+            userCurrMapper.update(null,new UpdateWrapper<UserCurr>().set("curr_name",imageName));
+        }
 
         return command;
     }

@@ -26,7 +26,7 @@
     <div id="app" v-cloak>
         <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
             <el-menu-item index="1">
-                <img src="/images/indexImages/docker.jpg" style="height: 40px"/>
+                <a href="/index"><img src="/images/indexImages/docker.jpg" style="height: 40px"/></a>
             </el-menu-item>
             <!--				<el-menu-item index="2" >处理中心</el-menu-item>-->
             <el-menu-item index="2" style="float: right" v-if="nickName=='未登录'"><a href="/login">请登录</a></el-menu-item>
@@ -130,7 +130,28 @@
 
 
                 </el-tab-pane>
-<!--                <el-tab-pane label="我的课程">我的课程</el-tab-pane>-->
+                <el-tab-pane label="我的课程">
+                    <div class="project1 clearfix" v-loading="loading" style="margin-bottom: 60px;">
+                        <ul>
+                            <li v-for="item in items" >
+                                <!--						<img :src="item.thumbnail" class="hot" alt="">-->
+                                <a :href="'/courseEditor?id='+item.id"><img :src="item.thumbnail" alt=""></a>
+                                <p>{{item.title}}</p>
+                                <p class="level"><span>高级</span>  2020-09-08</p>
+                                <!--                            <div>-->
+                                <!--                                <el-button icon="el-icon-search" circle></el-button>-->
+                                <div style="display: flex;justify-content: center;width: 100%;">
+                                    <el-button @click='open(item.id)' style="" type="danger" icon="el-icon-delete">删除</el-button>
+
+                                </div>
+                                <!--                            </div>-->
+
+                                <!--                            style="float: right"-->
+                            </li>
+                        </ul>
+                        <span v-if="items == [] ">您还没有发布过实验哦</span>
+                    </div>
+                </el-tab-pane>
 <!--                <el-tab-pane label="其他信息"></el-tab-pane>-->
 <!--                <el-tab-pane label="我的特长">定时任务补偿</el-tab-pane>-->
             </el-tabs>
