@@ -1,11 +1,17 @@
 package com.jackson.security.exception;
 
+import com.alibaba.fastjson.JSON;
+import com.jackson.exception.CustomizeErrorCode;
+import com.jackson.exception.CustomizeException;
+import com.jackson.result.Results;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * @author jackson
@@ -21,14 +27,21 @@ public class JWTAuthenticationEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
-        System.out.println("im coming");
-//        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
+
         //如果访问需要授权的资源，跳转到登录页面
-        try {
-            response.sendRedirect("/login");
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+//            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+//        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
+
+//            request.getRequestDispatcher("/index").forward(request, response);
+        //抛一个异常
+//        throw new CustomizeException(CustomizeErrorCode.UNAUTHORIZED);
+        Results resultDTO = Results.failure(CustomizeErrorCode.UNAUTHORIZED);
+        response.setContentType("application/json");
+        response.setStatus(200);
+        response.setCharacterEncoding("utf-8");
+        PrintWriter writer = response.getWriter();
+        writer.write(JSON.toJSONString(resultDTO));
+        writer.close();
+
     }
 }

@@ -1,13 +1,14 @@
 package com.jackson.security.filter;
 
 import com.alibaba.fastjson.JSON;
+import com.jackson.constants.SecurityConstants;
 import com.jackson.exception.CustomizeErrorCode;
 import com.jackson.exception.CustomizeException;
-import com.jackson.myUtils.RedisUtils;
+import com.jackson.myUtils.IpUtils;
 import com.jackson.result.Results;
-import com.jackson.security.constants.SecurityConstants;
 import com.jackson.security.utils.JwtTokenUtils;
 import com.jackson.threadLocal.RequestHolder;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
@@ -30,6 +31,7 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 /**
@@ -62,6 +64,10 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 //            System.out.println(authorization);
             chain.doFilter(request, response);
             return;
+////            response.sendRedirect("localhost:8090/login");
+//            PrintWriter writer = response.getWriter();
+//            writer.close();
+//            return;
         }
         String token = authorization.split(" ")[1];
         ServletContext context = request.getServletContext();
@@ -95,7 +101,6 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
             logger.info("checking username:" + username);
             // 通过 token 获取用户具有的角色
             List<SimpleGrantedAuthority> userRolesByToken = JwtTokenUtils.getUserRolesByToken(token);
-//            System.out.println(userRolesByToken);
             if (!StringUtils.isEmpty(username)) {
                 return new UsernamePasswordAuthenticationToken(username, null, userRolesByToken);
             }
@@ -112,5 +117,58 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
             logger.warning("Request to parse JWT with invalid signature . Detail : " + exception.getMessage());
         }
         return null;
+    }
+
+    /**
+     * 解析token进行比对
+     */
+    public static Object validationToken(HttpServletRequest request, String token){
+
+        String userToken = token.replace(SecurityConstants.TOKEN_PREFIX, "");
+        //获取容器
+        ServletContext context = request.getServletContext();
+        ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(context);
+        try {
+            //解析token
+            Claims claims = JwtTokenUtils.getTokenBody1(userToken);
+            //如果ip地址解析不一样或者用户类别不一样
+            if (!IpUtils.getIpAddr(request).equals(claims.get(SecurityConstants.USER_IP)) ) {
+                return new CustomizeException(CustomizeErrorCode.SYS_TOKEN_ERROR);
+            }
+            //与redis上的token进行比对
+            StringRedisTemplate stringRedisTemplate = (StringRedisTemplate) ctx.getBean("tokenDb");
+
+            if(stringRedisTemplate.hasKey(claims.getSubject()+"=="+claims.get("userType"))&&
+                    stringRedisTemplate.getExpire(claims.getSubject()+"=="+claims.get("userType"))>0){
+                //获取存储的token
+                String localToken = stringRedisTemplate.opsForValue().get(claims.getSubject()+"=="+claims.get("userType"));
+//                System.out.println(localToken);
+                if(token.equals(localToken)){
+                    //刷新token
+                    long expiration = 60*60*60;
+                    try {
+                        stringRedisTemplate.expire(claims.getSubject(),expiration , TimeUnit.MILLISECONDS);//设置过期时间
+                    }catch (Exception E){
+                        logger.warning("redis is error :"+E);
+                        return new CustomizeException(CustomizeErrorCode.SYS_TOKEN_ERROR);
+                    }
+                    //把用户信息存在threadLocal中
+                    Map map = new HashMap();
+                    map.put("userId",claims.getSubject());
+                    RequestHolder.add(map);
+                    return true;
+                }
+            }
+            return new CustomizeException(CustomizeErrorCode.SYS_TOKEN_ERROR);
+
+        }catch (ExpiredJwtException|MalformedJwtException | IllegalArgumentException exception){
+            logger.warning("Request to parse JWT with invalid signature . Detail : " + exception.getMessage());
+
+            if(exception instanceof ExpiredJwtException){
+                return new CustomizeException(CustomizeErrorCode.SYS_TOKEN_ERROR);
+            }
+            return new CustomizeException(CustomizeErrorCode.SYS_TOKEN_ERROR);
+        }
+
     }
 }

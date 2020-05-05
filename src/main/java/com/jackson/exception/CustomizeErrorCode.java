@@ -11,6 +11,7 @@ public enum CustomizeErrorCode implements ICustomizeErrorCode {
     FAIL(500, "请求失败"),
     PARAMETER_MISSING(600,"参数缺失"),
     UNAUTHORIZED(401,"未授权"),
+    SYS_ERROR_403(403,"没有权限"),
 
     QUESTION_NOT_FOUND(2001, "你找到问题不在了，要不要换个试试？"),
     TARGET_PARAM_NOT_FOUND(2002, "未选中任何问题或评论进行回复"),

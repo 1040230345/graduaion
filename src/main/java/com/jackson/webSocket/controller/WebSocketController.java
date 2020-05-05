@@ -62,7 +62,6 @@ public class WebSocketController {
             sshAgent.execCommand(this);
             //导入环境
             WebSocketService webSocketService = new WebSocketService();
-            System.out.println(token);
             String command = webSocketService.initContainer(id,token.split(" ")[1],applicationContext);
             this.sshAgent.printWriter.write(command);
             //this.sshAgent.printWriter.write("docker run -it --name xxx ubuntu:16.04 bash"+"\r\n");

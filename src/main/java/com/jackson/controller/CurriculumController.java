@@ -10,6 +10,7 @@ import com.jackson.threadLocal.RequestHolder;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import java.util.Date;
@@ -34,6 +35,7 @@ public class CurriculumController {
      */
     @GetMapping("/getCurriculumList")
     @ApiOperation("分页获取课程列表")
+//    @PreAuthorize("hasRole('ROLE_TEACHER')")
     public Results<Curriculum> getCurriculumList(Integer startPosition ){
         return curriculumService.getCurriculum(startPosition);
     }
@@ -43,6 +45,7 @@ public class CurriculumController {
      */
     @GetMapping("/userCurriculumList")
     @ApiOperation("获取个人实验列表")
+    @PreAuthorize("hasAnyRole('ROLE_TEACHER')")
     public Results getUserCurriculumList(){
         String username = (String) RequestHolder.getId();
         return curriculumService.getUserCurriculum(username);
@@ -55,6 +58,7 @@ public class CurriculumController {
      */
     @DeleteMapping("/Curriculum")
     @ApiOperation("删除实验")
+    @PreAuthorize("hasAnyRole('ROLE_TEACHER')")
     public Results delCurriculum(Integer currId){
         if (curriculumService.removeById(currId)) {
             return Results.success();
@@ -67,6 +71,7 @@ public class CurriculumController {
      */
     @PostMapping("/Curriculum")
     @ApiOperation("添加实验")
+    @PreAuthorize("hasAnyRole('ROLE_TEACHER')")
     public Results addCurriculum( Curriculum curriculum){
         String username = (String) RequestHolder.getId();
         //获取用户id

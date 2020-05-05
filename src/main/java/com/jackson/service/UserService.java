@@ -147,6 +147,8 @@ public class UserService extends ServiceImpl<UserMapper, SysUser> {
         //获取用户username
         String username = (String) RequestHolder.getId();
 
+        System.out.println(username);
+
         Integer delNum = userCurrMapper.delUserCurr(username,userCurrId);
 
         if(delNum>0){

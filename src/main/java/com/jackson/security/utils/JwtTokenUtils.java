@@ -98,4 +98,11 @@ public class JwtTokenUtils {
 //            return this.generateTokenByClaims(claims);
 //        }
 //    }
+
+    public static Claims getTokenBody1(String token) {
+        return Jwts.parser()
+                .setSigningKey(secretKey)
+                .parseClaimsJws(token)
+                .getBody();
+    }
 }

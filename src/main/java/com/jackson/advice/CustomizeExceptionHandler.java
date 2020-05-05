@@ -5,6 +5,7 @@ import com.jackson.exception.CustomizeErrorCode;
 import com.jackson.exception.CustomizeException;
 import com.jackson.result.Results;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -31,6 +32,8 @@ public class CustomizeExceptionHandler {
             // 返回 JSON
             if (e instanceof CustomizeException) {
                 resultDTO = Results.failure((CustomizeException) e);
+            } else if (e instanceof AccessDeniedException) {
+                resultDTO = Results.failure(CustomizeErrorCode.SYS_ERROR_403);
             } else {
                 log.error("handle error {}", e);
                 resultDTO = Results.failure(CustomizeErrorCode.SYS_ERROR);
@@ -45,15 +48,19 @@ public class CustomizeExceptionHandler {
             } catch (IOException ioe) {
             }
             return null;
+//        }
 //        } else {
 //            // 错误页面跳转
 //            if (e instanceof CustomizeException) {
 //                model.addAttribute("message", e.getMessage());
-//            } else {
+//            } else if(e instanceof AccessDeniedException){
+//                model.addAttribute("message", e.getMessage());
+////                model.addAttribute("message", CustomizeErrorCode.SYS_ERROR.getMessage());
+//                return new ModelAndView("403");
+//            } else{
 //                log.error("handle error", e);
 //                model.addAttribute("message", CustomizeErrorCode.SYS_ERROR.getMessage());
 //            }
 //            return new ModelAndView("error");
-//        }
     }
 }

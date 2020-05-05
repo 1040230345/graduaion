@@ -11,6 +11,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -59,10 +60,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/auth/login","/image/upImage").permitAll()
 //                .antMatchers(HttpMethod.GET, "/getPage").permitAll()
                  //指定路径下的资源需要验证了的用户才能访问
-//                .antMatchers("/websocket","/user/**").authenticated()
+                .antMatchers("/websocket","/user/**").authenticated()
 //                .antMatchers(HttpMethod.DELETE, "/api/**").hasRole("ADMIN")
                 // 其他都放行了
-                .anyRequest().permitAll()
+//                .anyRequest().permitAll()
                 .and()
                 //添加自定义Filter
                 .addFilter(new JWTAuthenticationFilter(authenticationManager()))
@@ -78,5 +79,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 ////                .successHandler(myAuthenticationSuccessHandler)
 //                .failureHandler(myAuthenctiationFailureHandler);
     }
+
+//    @Override
+//    public void configure(WebSecurity web) {
+//        web.ignoring().antMatchers("/v2/**",//swagger api json
+//                "/swagger-resources/**",//用来获取支持的动作
+////                "/swagger-resources",//用来获取api-docs的URI
+////                "/swagger-resources/configuration/security",//安全选项
+//                "/swagger-ui.html",
+//                "/webjars/**",
+//                "/swagger/**",
+//                "/static/**");
+//        web.ignoring().antMatchers("/images/**","/login","/index");
+//    }
+
 
 }

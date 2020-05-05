@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 
 @Controller
-@RequestMapping("/user")
 @ResponseBody
 @Api(tags = "用户接口")
 public class UserController {
@@ -28,7 +27,7 @@ public class UserController {
     /**
      * 获取用户信息
      */
-    @GetMapping("/getUser")
+    @GetMapping("/user/getUser")
     @ApiOperation("获取用户信息")
     public Results getUser(HttpServletRequest request){
         //获取username
@@ -50,7 +49,7 @@ public class UserController {
     /**
      * 用户退出
      */
-    @PostMapping("/loginOut")
+    @PostMapping("/user/loginOut")
     @ApiOperation("用户退出")
     public Results loginOut(HttpServletRequest request){
         //从头部中获取token
@@ -62,7 +61,7 @@ public class UserController {
     /**
      * 更改用户信息
      */
-    @PutMapping("/userMsg")
+    @PutMapping("/user/userMsg")
     @ApiOperation("更改用户信息")
     public Results updateUserMsg(@RequestBody SysUser sysUser){
 
@@ -81,7 +80,7 @@ public class UserController {
     /**
      * 获取做过的实验
      */
-    @GetMapping("/userCurr")
+    @GetMapping("/user/userCurr")
     @ApiOperation("获取个人做过的实验")
     public Results getUserCurr(){
         //获取用户username
@@ -93,7 +92,7 @@ public class UserController {
     /**
      * 删除做过的实验
      */
-    @DeleteMapping("/userCurr")
+    @DeleteMapping("/user/userCurr")
     @ApiOperation("删除做过的实验")
     public Results delUserCurr(Integer userCurrId){
         return userService.delUserCurr(userCurrId);

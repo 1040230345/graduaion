@@ -130,12 +130,12 @@
 
 
                 </el-tab-pane>
-                <el-tab-pane label="我的课程">
+                <el-tab-pane label="参与过的实验">
                     <div class="project1 clearfix" v-loading="loading" style="margin-bottom: 60px;">
                         <ul>
                             <li v-for="item in items" >
                                 <!--						<img :src="item.thumbnail" class="hot" alt="">-->
-                                <a :href="'/courseEditor?id='+item.id"><img :src="item.thumbnail" alt=""></a>
+                                <a :href = "'/experiment?expId='+item.id"><img :src="item.thumbnail" alt=""></a>
                                 <p>{{item.title}}</p>
                                 <p class="level"><span>高级</span>  2020-09-08</p>
                                 <!--                            <div>-->
@@ -203,20 +203,42 @@
                 sex: "",
                 email: "",
                 role:'',
+                items: []
             }
         },
         created(){
             console.log(localStorage.getItem("token"))
+
+            axios.get('user/userCurr',
+                {
+                    headers: {'Authorization': localStorage.getItem("token")}
+                }
+            ).then((res) => {
+                if (res.data.code == 2017) {
+                    this.$message({
+                        message: '您的登录已经过期，请重新登录',
+                        type: 'warning'
+                    });
+                    setTimeout(() => {
+                        window.location.href = "login";
+                    }, 1500)
+                }
+                if(res.data.code == 401){
+                    this.$message({
+                        message: '您还未登录哦',
+                        type: 'warning'
+                    });
+                    setTimeout(() => {
+                        window.location.href = "login";
+                    }, 1500)
+                }
+                console.log(res)
+                this.items = res.data.data;
+                this.loading = false
+            })
             this.getUser()
         },
         methods:{
-            // handleRemove(file, fileList) {
-            //     console.log(file, fileList);
-            // },
-            // handlePictureCardPreview(file) {
-            //     this.dialogImageUrl = file.url;
-            //     this.dialogVisible = true;
-            // },
             change(file,filelist){
                if(filelist.length==1){
                    document.querySelector('.el-upload--picture-card').style.display="none";
@@ -373,6 +395,61 @@
 
                     })
                 }
+            },
+
+            //删除实验
+            delCurr(currId){
+                axios.delete('user/userCurr',{
+                        params:{
+                            userCurrId : currId
+                        },
+                        headers: {'Authorization': localStorage.getItem("token")}}
+                ).then((res) => {
+                    if (res.data.code == 2017) {
+                        this.$message({
+                            message: '您的登录已经过期，请重新登录',
+                            type: 'warning'
+                        });
+                        setTimeout(() => {
+                            window.location.href = "login";
+                        }, 1500)
+                    }
+                    console.log(res)
+                    if(res.data.code == 200){
+                        this.$message({
+                            message: '删除成功',
+                            type: 'success'
+                        });
+                        setTimeout(() => {
+                            window.location.href = "/getPage?pageName=myHome";
+                        }, 1500)
+                    }else {
+                        this.$message({
+                            message: '删除失败',
+                            type: 'warning'
+                        });
+                    }
+                })
+            },
+
+            open(currId) {
+                this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    console.log(currId)
+                    this.delCurr(currId)
+                    // this.$message({
+                    //     type: 'success',
+                    //     message: '删除成功!'
+                    // });
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
             }
         },
     })

@@ -145,6 +145,15 @@
                                 window.location.href="login";
                             },1500)
                         }
+                        if(res.data.code == 401){
+                            this.$message({
+                                message: '您还未登录哦',
+                                type: 'warning'
+                            });
+                            setTimeout(() => {
+                                window.location.href = "login";
+                            }, 1500)
+                        }
                         if(res.data.code==200){
                             if(res.data.data.nickname){
                                 this.nickName = res.data.data.nickname;
@@ -159,6 +168,14 @@
                         }
 
                     })
+                }else {
+                    this.$message({
+                        message: '您还未登录哦',
+                        type: 'warning'
+                    });
+                    setTimeout(() => {
+                        window.location.href = "login";
+                    }, 1500)
                 }
             },
             outLogin(){
@@ -204,6 +221,15 @@
                             setTimeout(()=>{
                                 window.location.href="login";
                             },1500)
+                        }
+                        if(res.data.code==403){
+                            this.$message({
+                                message: '您的权限不足哦',
+                                type: 'warning'
+                            });
+                            setTimeout(() => {
+                                window.location.href = "login";
+                            }, 1500)
                         }
                         if(res.data.code==200){
                             this.items = res.data.data;

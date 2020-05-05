@@ -229,6 +229,15 @@
                         window.location.href = "login";
                     }, 1500)
                 }
+                if(res.data.code==403){
+                    this.$message({
+                        message: '您的权限不足哦',
+                        type: 'warning'
+                    });
+                    setTimeout(() => {
+                        window.location.href = "login";
+                    }, 1500)
+                }
                 console.log(res)
                 this.items = res.data.data;
                 this.loading = false
@@ -295,6 +304,15 @@
                         if (res.data.code == 2017) {
                             this.$message({
                                 message: '您的登录已经过期，请重新登录',
+                                type: 'warning'
+                            });
+                            setTimeout(() => {
+                                window.location.href = "login";
+                            }, 1500)
+                        }
+                        if(res.data.code == 401){
+                            this.$message({
+                                message: '您还未登录哦',
                                 type: 'warning'
                             });
                             setTimeout(() => {
