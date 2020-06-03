@@ -1,30 +1,14 @@
 package com.jackson.controller;
 
-import com.jackson.security.exception.SuccessfullyProcessed;
-import com.jackson.security.filter.JWTAuthorizationFilter;
 import com.jackson.service.UserService;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.annotations.Results;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Collection;
 
 @Controller
 @Slf4j
@@ -62,65 +46,65 @@ public class TestController {
         return "如果你看见这句话，说明你有ROLE_USER角色";
     }
 
-    @RequestMapping("/test")
-    @ResponseBody
-    public Results testController(HttpServletRequest request,HttpServletResponse response) throws IOException {
-
-        FilterChain chain = new FilterChain() {
-            @Override
-            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-
-            }
-        };
-        Authentication authentication = new Authentication() {
-            @Override
-            public Collection<? extends GrantedAuthority> getAuthorities() {
-                return null;
-            }
-
-            @Override
-            public Object getCredentials() {
-                return null;
-            }
-
-            @Override
-            public Object getDetails() {
-                return null;
-            }
-
-            @Override
-            public Object getPrincipal() {
-                return null;
-            }
-
-            @Override
-            public boolean isAuthenticated() {
-                return false;
-            }
-
-            @Override
-            public void setAuthenticated(boolean b) throws IllegalArgumentException {
-
-            }
-
-            @Override
-            public String getName() {
-                return null;
-            }
-        };
-        String userType = "null";
-
-        SuccessfullyProcessed.successfulAuthentication(request,response,chain,authentication,userType);
-
-
-        JWTAuthorizationFilter jwtAuthorizationFilter = new JWTAuthorizationFilter(new AuthenticationManager() {
-            @Override
-            public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-                return null;
-            }
-        });
-        jwtAuthorizationFilter.validationToken(request,userType);
-        return null;
-    }
+//    @RequestMapping("/test")
+//    @ResponseBody
+//    public Results testController(HttpServletRequest request,HttpServletResponse response) throws IOException {
+//
+//        FilterChain chain = new FilterChain() {
+//            @Override
+//            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
+//
+//            }
+//        };
+//        Authentication authentication = new Authentication() {
+//            @Override
+//            public Collection<? extends GrantedAuthority> getAuthorities() {
+//                return null;
+//            }
+//
+//            @Override
+//            public Object getCredentials() {
+//                return null;
+//            }
+//
+//            @Override
+//            public Object getDetails() {
+//                return null;
+//            }
+//
+//            @Override
+//            public Object getPrincipal() {
+//                return null;
+//            }
+//
+//            @Override
+//            public boolean isAuthenticated() {
+//                return false;
+//            }
+//
+//            @Override
+//            public void setAuthenticated(boolean b) throws IllegalArgumentException {
+//
+//            }
+//
+//            @Override
+//            public String getName() {
+//                return null;
+//            }
+//        };
+//        String userType = "null";
+//
+//        SuccessfullyProcessed.successfulAuthentication(request,response,chain,authentication,userType);
+//
+//
+//        JWTAuthorizationFilter jwtAuthorizationFilter = new JWTAuthorizationFilter(new AuthenticationManager() {
+//            @Override
+//            public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+//                return null;
+//            }
+//        });
+//        jwtAuthorizationFilter.validationToken(request,userType);
+//        return null;
+//    }
 
 }

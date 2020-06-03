@@ -107,6 +107,7 @@
                     data: data,
                     dataType: "json",
                     type: "post",
+                    headers: {'Authorization': localStorage.getItem("token")},
                     success: function(msg) {
                         if (msg.code == 200) {
                             that.$notify({

@@ -16,6 +16,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -59,16 +60,13 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
         this.httpServletResponse = response;
 
         String authorization = request.getHeader(SecurityConstants.TOKEN_HEADER);
+
         // 如果请求头中没有token信息则直接放行了
         if (authorization == null || !authorization.startsWith(SecurityConstants.TOKEN_PREFIX)) {
-//            System.out.println(authorization);
             chain.doFilter(request, response);
             return;
-////            response.sendRedirect("localhost:8090/login");
-//            PrintWriter writer = response.getWriter();
-//            writer.close();
-//            return;
         }
+
         String token = authorization.split(" ")[1];
         ServletContext context = request.getServletContext();
         ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(context);
@@ -79,10 +77,15 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
             return;
         }
 
+
+        Object usernamePasswordAuthenticationToken = getAuthentication(authorization,response,request);
+
+        if(usernamePasswordAuthenticationToken instanceof CustomizeException){
+            this.responseMsg(Results.failure((CustomizeException)usernamePasswordAuthenticationToken),response);
+            return;
+        }
         // 如果请求头中有token，则进行解析，并且设置授权信息
-        SecurityContextHolder.getContext().setAuthentication(getAuthentication(authorization,response));
-        //将token放在响应头里
-//        response.setHeader(SecurityConstants.TOKEN_HEADER, token);
+        SecurityContextHolder.getContext().setAuthentication((Authentication) usernamePasswordAuthenticationToken);
 
         super.doFilterInternal(request, response, chain);
     }
@@ -90,20 +93,49 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
     /**
      * 获取用户认证信息 Authentication
      */
-    private UsernamePasswordAuthenticationToken getAuthentication(String authorization,HttpServletResponse response) throws IOException {
+    private Object getAuthentication(String authorization,HttpServletResponse response,HttpServletRequest request) throws IOException {
         String token = authorization.replace(SecurityConstants.TOKEN_PREFIX, "");
         try {
+
+            //获取容器
+            ServletContext context = request.getServletContext();
+            ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(context);
+            StringRedisTemplate stringRedisTemplate = ctx.getBean(StringRedisTemplate.class);
+
             String username = JwtTokenUtils.getUsernameByToken(token);
 
-            //把用户信息存在threadLocal中
-            RequestHolder.add(username);
+            /**
+             * 如果说，redis中存在值且时间大于一分钟
+             */
+            if(stringRedisTemplate.hasKey(username)&&stringRedisTemplate.getExpire(username)>60){
 
-            logger.info("checking username:" + username);
-            // 通过 token 获取用户具有的角色
-            List<SimpleGrantedAuthority> userRolesByToken = JwtTokenUtils.getUserRolesByToken(token);
-            if (!StringUtils.isEmpty(username)) {
-                return new UsernamePasswordAuthenticationToken(username, null, userRolesByToken);
+                String localToken = stringRedisTemplate.opsForValue().get(username);
+
+                if(localToken.equals(authorization)){
+
+                    //解析token
+                    Claims claims = JwtTokenUtils.getTokenBody1(token);
+                    //如果ip地址解析不一样
+                    if (!IpUtils.getIpAddr(request).equals(claims.get(SecurityConstants.USER_IP))) {
+                        return new CustomizeException(CustomizeErrorCode.UNAUTHORIZED);
+                    }
+                    //把用户信息存在threadLocal中
+                    RequestHolder.add(username);
+
+                    //刷新
+                    stringRedisTemplate.opsForValue().set(username,authorization,60*60, TimeUnit.SECONDS);
+
+                    logger.info("checking username:" + username);
+                    // 通过 token 获取用户具有的角色
+                    List<SimpleGrantedAuthority> userRolesByToken = JwtTokenUtils.getUserRolesByToken(token);
+                    if (!StringUtils.isEmpty(username)) {
+                        return new UsernamePasswordAuthenticationToken(username, null, userRolesByToken);
+                    }
+                }
             }
+            return new CustomizeException(CustomizeErrorCode.UNAUTHORIZED);
+//            this.responseMsg(Results.failure(CustomizeErrorCode.SYS_ERROR_403),response);
+
         } catch (SignatureException | ExpiredJwtException | MalformedJwtException | IllegalArgumentException exception) {
             //已经过期捕获
             if (exception instanceof ExpiredJwtException) {
@@ -119,56 +151,16 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
         return null;
     }
 
+
     /**
-     * 解析token进行比对
+     * 返回数据
      */
-    public static Object validationToken(HttpServletRequest request, String token){
-
-        String userToken = token.replace(SecurityConstants.TOKEN_PREFIX, "");
-        //获取容器
-        ServletContext context = request.getServletContext();
-        ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(context);
-        try {
-            //解析token
-            Claims claims = JwtTokenUtils.getTokenBody1(userToken);
-            //如果ip地址解析不一样或者用户类别不一样
-            if (!IpUtils.getIpAddr(request).equals(claims.get(SecurityConstants.USER_IP)) ) {
-                return new CustomizeException(CustomizeErrorCode.SYS_TOKEN_ERROR);
-            }
-            //与redis上的token进行比对
-            StringRedisTemplate stringRedisTemplate = (StringRedisTemplate) ctx.getBean("tokenDb");
-
-            if(stringRedisTemplate.hasKey(claims.getSubject()+"=="+claims.get("userType"))&&
-                    stringRedisTemplate.getExpire(claims.getSubject()+"=="+claims.get("userType"))>0){
-                //获取存储的token
-                String localToken = stringRedisTemplate.opsForValue().get(claims.getSubject()+"=="+claims.get("userType"));
-//                System.out.println(localToken);
-                if(token.equals(localToken)){
-                    //刷新token
-                    long expiration = 60*60*60;
-                    try {
-                        stringRedisTemplate.expire(claims.getSubject(),expiration , TimeUnit.MILLISECONDS);//设置过期时间
-                    }catch (Exception E){
-                        logger.warning("redis is error :"+E);
-                        return new CustomizeException(CustomizeErrorCode.SYS_TOKEN_ERROR);
-                    }
-                    //把用户信息存在threadLocal中
-                    Map map = new HashMap();
-                    map.put("userId",claims.getSubject());
-                    RequestHolder.add(map);
-                    return true;
-                }
-            }
-            return new CustomizeException(CustomizeErrorCode.SYS_TOKEN_ERROR);
-
-        }catch (ExpiredJwtException|MalformedJwtException | IllegalArgumentException exception){
-            logger.warning("Request to parse JWT with invalid signature . Detail : " + exception.getMessage());
-
-            if(exception instanceof ExpiredJwtException){
-                return new CustomizeException(CustomizeErrorCode.SYS_TOKEN_ERROR);
-            }
-            return new CustomizeException(CustomizeErrorCode.SYS_TOKEN_ERROR);
-        }
-
+    public void responseMsg (Results restResult,HttpServletResponse response) throws IOException {
+        //返回错误
+        response.setContentType("application/json");
+        response.setCharacterEncoding("utf-8");
+        PrintWriter writer = response.getWriter();
+        writer.write(JSON.toJSONString(restResult));
+        writer.close();
     }
 }

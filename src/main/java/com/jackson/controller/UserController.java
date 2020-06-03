@@ -42,8 +42,8 @@ public class UserController {
      */
     @PostMapping("/addUser")
     @ApiOperation("用户注册")
-    public Results addUser(String username,String password,Integer userType){
-        return userService.register(username, password, userType);
+    public Results addUser(String username,String password,Integer userType,HttpServletRequest request){
+        return userService.register(username, password, userType,request);
     }
 
     /**

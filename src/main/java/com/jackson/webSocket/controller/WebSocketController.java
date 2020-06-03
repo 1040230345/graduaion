@@ -11,6 +11,8 @@ import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
+import com.jackson.exception.CustomizeErrorCode;
+import com.jackson.exception.CustomizeException;
 import com.jackson.security.constants.SecurityConstants;
 import com.jackson.webSocket.service.WebSocketService;
 import com.jackson.webSocket.utils.SSHAgent;
@@ -51,6 +53,10 @@ public class WebSocketController {
     @OnOpen
     public void onOpen(Session session,@PathParam("id") Integer id,
                        @PathParam("token") String token) {
+
+        if(token==null||"".equals(token)){
+            throw new CustomizeException(CustomizeErrorCode.UNAUTHORIZED);
+        }
         log.info("客户端连接！");
         this.session = session;
         try {
@@ -96,7 +102,7 @@ public class WebSocketController {
                 return;
             }
             //通过工具类的标准输入网远程服务器中写内容
-            this.sshAgent.printWriter.write( message+ "\r\n");
+            this.sshAgent.printWriter.write( message+ " \r\n");
             this.sshAgent.printWriter.flush();
         } catch (Exception e) {
             e.printStackTrace();
@@ -119,7 +125,6 @@ public class WebSocketController {
      * @throws IOException
      */
     public void sendMessage(String message) throws IOException {
-//        long  timeNew =  System.currentTimeMillis();
         System.out.println(message);
         this.session.getBasicRemote().sendText(message);
     }

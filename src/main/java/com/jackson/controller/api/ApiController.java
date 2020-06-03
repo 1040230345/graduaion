@@ -33,5 +33,13 @@ public class ApiController {
         return "index";
     }
 
+    /**
+     * 测试
+     */
+    @GetMapping("/m")
+    public String getMIndex(){
+        return "/m_index";
+    }
+
 
 }

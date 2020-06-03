@@ -29,8 +29,9 @@ public class JwtTokenUtils {
     private static byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary(SecurityConstants.JWT_SECRET_KEY);
     private static SecretKey secretKey = Keys.hmacShaKeyFor(apiKeySecretBytes);
 
-    public static String createToken(String username, List<String> roles, boolean isRememberMe) {
-        long expiration = isRememberMe ? SecurityConstants.EXPIRATION_REMEMBER : SecurityConstants.EXPIRATION;
+    public static String createToken(String username, List<String> roles, boolean isRememberMe,String userIp) {
+
+        //        long expiration = isRememberMe ? SecurityConstants.EXPIRATION_REMEMBER : SecurityConstants.EXPIRATION;
 
         String tokenPrefix = Jwts.builder()
                 .setHeaderParam("typ", SecurityConstants.TOKEN_TYPE)
@@ -39,7 +40,8 @@ public class JwtTokenUtils {
                 .setIssuer("SnailClimb")
                 .setIssuedAt(new Date())
                 .setSubject(username)
-                .setExpiration(new Date(System.currentTimeMillis() + expiration * 1000))
+                .claim("userIp",userIp)
+//                .setExpiration(new Date(System.currentTimeMillis() + expiration * 1000))
                 .compact();
         return SecurityConstants.TOKEN_PREFIX + tokenPrefix;
     }

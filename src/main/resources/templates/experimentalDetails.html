@@ -81,7 +81,7 @@
                             <!--						<img :src="item.thumbnail" class="hot" alt="">-->
                             <a :href="'/courseEditor?id='+item.id"><img :src="item.thumbnail" alt=""></a>
                             <p>{{item.title}}</p>
-                            <p class="level"><span>高级</span>  2020-09-08</p>
+                            <p class="level"><span>高级</span>  {{item.synopsis}}</p>
 <!--                            <div>-->
 <!--                                <el-button icon="el-icon-search" circle></el-button>-->
                             <div style="display: flex;justify-content: center;width: 100%;">
@@ -382,6 +382,7 @@
             //删除实验
             delCurr(currId){
                 axios.delete('curriculum/Curriculum',{
+                    headers: {'Authorization': localStorage.getItem("token")},
                     params:{
                         currId : currId
                     }
@@ -467,10 +468,6 @@
                     type: 'warning'
                 }).then(() => {
                     this.delCurr(currId)
-                    this.$message({
-                        type: 'success',
-                        message: '删除成功!'
-                    });
                 }).catch(() => {
                     this.$message({
                         type: 'info',

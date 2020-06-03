@@ -3,11 +3,14 @@ package com.jackson.security.filter;
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jackson.exception.CustomizeErrorCode;
+import com.jackson.myUtils.IpUtils;
 import com.jackson.result.Results;
 import com.jackson.security.constants.SecurityConstants;
 import com.jackson.security.entity.LoginUser;
 import com.jackson.security.utils.JwtTokenUtils;
 import lombok.SneakyThrows;
+import org.springframework.context.ApplicationContext;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
@@ -15,13 +18,16 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import javax.servlet.FilterChain;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -48,26 +54,16 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-//            String username = request.getParameter("username");
-//            String password = request.getParameter("password");
-////            System.out.println(username);
-//            LoginUser loginUser = new LoginUser();
-//            loginUser.setPassword(password);
-//            loginUser.setUsername(username);
-//            loginUser.setRememberMe(true);
-            //System.out.println(request.toString());
             // 从输入流中获取到登录的信息
             LoginUser loginUser = objectMapper.readValue(request.getInputStream(), LoginUser.class);
-//            System.out.println(loginUser.toString());
             rememberMe.set(loginUser.getRememberMe());
+
             // 这部分和attemptAuthentication方法中的源码是一样的，
             // 只不过由于这个方法源码的是把用户名和密码这些参数的名字是死的，所以我们重写了一下
             UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(
                     loginUser.getUsername(), loginUser.getPassword());
             return authenticationManager.authenticate(authRequest);
         } catch (Exception e) {
-            //e.printStackTrace();
-            //throw new CustomizeException(CustomizeErrorCode.SYS_USER_NOFOUND);
             this.unsuccessfulAuthentication(request, response, (AuthenticationException)e);
             return null;
         }
@@ -87,8 +83,22 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
-        // 创建 Token
-        String token = JwtTokenUtils.createToken(jwtUser.getUsername(), roles, rememberMe.get());
+
+        //获取用户ip地址，浏览器信息
+        String userIp = IpUtils.getIpAddr(request);
+
+        String token = JwtTokenUtils.createToken(jwtUser.getUsername(), roles, rememberMe.get(),userIp);
+
+        //存到redis
+        //获取容器
+        ServletContext context = request.getServletContext();
+        ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(context);
+
+        //存redis
+        StringRedisTemplate stringRedisTemplate = ctx.getBean(StringRedisTemplate.class);
+
+        //向redis里存入数据和设置缓存时间
+        stringRedisTemplate.opsForValue().set(jwtUser.getUsername(),token,60*60, TimeUnit.SECONDS);
 
         // Http Response Header 中返回 Token
         response.setHeader(SecurityConstants.TOKEN_HEADER, token);

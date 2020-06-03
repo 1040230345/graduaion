@@ -280,6 +280,15 @@
                                 window.location.href="login";
                             },1500)
                         }
+                        if (res.data.code == 401){
+                            this.$message({
+                                message: '您的登录状态异常',
+                                type: 'warning'
+                            });
+                            setTimeout(()=>{
+                                window.location.href="/login";
+                            },1500)
+                        }
                         if(res.data.code==200){
                             this.role = res.data.data.role;
                             if(res.data.data.nickname){

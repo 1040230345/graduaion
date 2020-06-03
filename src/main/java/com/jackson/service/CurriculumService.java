@@ -25,10 +25,10 @@ public class CurriculumService extends ServiceImpl<CurriculumMapper,Curriculum> 
      * 获取所有实验列表
      * @return
      */
-    public Results getCurriculum(int startPosition) {
+    public Results getCurriculum(Integer startPosition) {
         //计算出应该是截取到哪里
-        startPosition = (startPosition-1)*12;
-        int limit = 12;
+        startPosition = (startPosition-1)*5;
+        int limit = 5;
         //返回数据总数、本页信息
         return Results.success(curriculumMapper.countAllCurriculum().intValue(), curriculumMapper.getCurriculumList(startPosition,limit));
     }

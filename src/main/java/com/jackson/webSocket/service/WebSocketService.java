@@ -33,6 +33,12 @@ public class WebSocketService {
         //解析token
         String username = JwtTokenUtils.getUsernameByToken(token);
 
+
+        //获取docker镜像名称
+        String imageName = curriculumMapper.getDockerPath(chapterId);
+        //生成容器名称 时间搓 + 用户名
+        String dockerName = new Date().getTime()+username;
+        String command;
         /**
          * 优先判断是否存在未完成的容器
          */
@@ -40,16 +46,19 @@ public class WebSocketService {
             //获取容器名称
             String containerName =stringRedisTemplate.opsForValue()
                     .get(username+"=="+String.valueOf(chapterId));
-            String command = "docker start -i "+containerName+"\r\n";
+            command = "docker start -i "+containerName+"\r\n";
             return command;
         }
 
-        //获取docker镜像名称
-        String imageName = curriculumMapper.getDockerPath(chapterId);
-        //生成容器名称 时间搓 + 用户名
-        String dockerName = new Date().getTime()+username;
-
-        String command = "docker run -it --name "+dockerName+" "+imageName+" bash"+"\r\n";
+        if(imageName.equals("mysql:8.0")){
+            command=  "docker run --name "+dockerName+" -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:8.0 "+"\r\n";
+        }if(imageName.equals("redis:6.0.0")){
+            command="docker run --name  "+dockerName+ "   -d redis:6.0.0 --requirepass '123456' "+"\r\n";
+//            "docker exec -it  "+dockerName+  " redis-cli "+"\r\n";
+        }
+        else {
+            command = "docker run -it --name "+dockerName+" "+imageName+" bash"+"\r\n";
+        }
 
         //存在redis中
         stringRedisTemplate.opsForValue().set(username+"=="+chapterId, dockerName,60*60*24*7, TimeUnit.SECONDS);//向redis里存入数据和设置缓存时间

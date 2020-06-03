@@ -34,7 +34,6 @@ public class ChapterController {
     public Results upBookText(Chapter chapter){
         chapter.setCreateTime(new Date().getTime());
         chapterService.save(chapter);
-//        request.getSession().setAttribute("text",bookText);
         return Results.success("发送成功");
     }
 
@@ -53,11 +52,6 @@ public class ChapterController {
                 e.setText(pdp.markdownToHtml(e.getText()));
             });
         }
-//        String text  = (String)request.getSession().getAttribute("text");
-//        PegDownProcessor pdp = new PegDownProcessor(Integer.MAX_VALUE);
-//        String htmlContent = pdp.markdownToHtml(text);
-////        System.out.println(htmlContent);
-//        return Results.success(htmlContent);
         return Results.success(chapterList);
     }
 

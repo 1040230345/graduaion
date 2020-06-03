@@ -65,18 +65,18 @@
 						<a :href = "'/experiment?expId='+item.id ">
 							<img :src="item.thumbnail" alt=""></a>
 						<p>{{item.title}}</p>
-						<p class="level"><span>高级</span>  {{item.createTime}}</p>
+						<p class="level"><span>高级</span>  {{item.synopsis}}</p>
 					</li>
 				</ul>
 
 			</div>
-			<el-pagination style="text-align: center;"
+			<el-pagination style="float: right;"
 					background
 					@current-change="handleCurrentChange"
-					:page-size="10"
+					@size-change="handleSizeChange"
 					layout="prev, pager, next"
-					:total="20"
-			>
+					:page-size="5"
+					:total="total">
 			</el-pagination>
 
 		</div>
@@ -97,31 +97,37 @@
 					currentDate: new Date(),
 					items:[],
 					loading: true,
-					currentPage4: 4,
+					currentPage: 1,
 					token : '',
 					role: '',
+					total: 0,
 				}
 			},
 			created(){
 
 				console.log(localStorage.getItem("token"))
 				this.getUser()
-				axios.get('curriculum/getCurriculumList',
-						{
-							params: {
-								startPosition:1
-							}
-				},).then((res)=>{
-					console.log(res)
-					this.items=res.data.datas;
-					this.loading= false
-				})
+				this.getCurr(1)
 
 			},
 			mounted(){
 
 			},
 			methods: {
+				getCurr(number){
+					axios.get('curriculum/getCurriculumList',
+							{
+								params: {
+									startPosition:number
+								}
+							},).then((res)=>{
+						console.log(res)
+						this.items=res.data.datas;
+						this.total = res.data.count;
+						console.log(this.total)
+						this.loading= false
+					})
+				},
 				getUser(){
 					if(localStorage.getItem("token")){
 						this.token = localStorage.getItem("token");
@@ -132,6 +138,7 @@
 									headers: {'Authorization':localStorage.getItem("token") }
 								}
 						).then((res)=>{
+							console.log(res)
 							if (res.data.code == 2017){
 								this.$message({
 									message: '您的登录已经过期，请重新登录',
@@ -139,6 +146,15 @@
 								});
 								setTimeout(()=>{
 									window.location.href="login";
+								},1500)
+							}
+							if (res.data.code == 401){
+								this.$message({
+									message: '您的登录状态异常',
+									type: 'warning'
+								});
+								setTimeout(()=>{
+									window.location.href="/login";
 								},1500)
 							}
 							if(res.data.code==200){
@@ -163,6 +179,7 @@
 				},
 				handleCurrentChange(val) {
 					console.log(`当前页: ${val}`);
+					this.getCurr(val);
 				},
 				handleSelect(key, keyPath) {
 					console.log(key, keyPath);

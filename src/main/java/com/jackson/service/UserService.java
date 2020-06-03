@@ -12,6 +12,7 @@ import com.jackson.exception.CustomizeException;
 import com.jackson.model.SysRole;
 import com.jackson.model.SysRoleUser;
 import com.jackson.model.SysUser;
+import com.jackson.myUtils.IpUtils;
 import com.jackson.result.Results;
 import com.jackson.security.utils.JwtTokenUtils;
 import com.jackson.threadLocal.RequestHolder;
@@ -21,9 +22,12 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 用户操作事务层
@@ -60,7 +64,7 @@ public class UserService extends ServiceImpl<UserMapper, SysUser> {
      * 用户注册
      * @return
      */
-    public Results register(String username,String password,Integer userType) {
+    public Results register(String username, String password, Integer userType, HttpServletRequest request) {
 
         //数据校验
         if(username==null||password==null||userType==null){
@@ -101,7 +105,10 @@ public class UserService extends ServiceImpl<UserMapper, SysUser> {
         }
 
         // 创建 Token
-        String token = JwtTokenUtils.createToken(username, roles, false);
+        String userIp = IpUtils.getIpAddr(request);
+        String token = JwtTokenUtils.createToken(username, roles, false,userIp);
+
+        stringRedisTemplate.opsForValue().set(username,token,60*60, TimeUnit.SECONDS);
 
         return Results.success("注册成功",token);
     }
@@ -146,8 +153,6 @@ public class UserService extends ServiceImpl<UserMapper, SysUser> {
     public Results delUserCurr(Integer userCurrId){
         //获取用户username
         String username = (String) RequestHolder.getId();
-
-        System.out.println(username);
 
         Integer delNum = userCurrMapper.delUserCurr(username,userCurrId);
 
